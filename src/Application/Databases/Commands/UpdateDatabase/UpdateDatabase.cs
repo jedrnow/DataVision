@@ -24,8 +24,7 @@ public class UpdateDatabaseCommandHandler : IRequestHandler<UpdateDatabaseComman
 
         Guard.Against.NotFound(request.Id, database);
 
-        database.Name = request.Name;
-        database.ConnectionString = request.ConnectionString;
+        database.Update(request.Name, request.ConnectionString);
 
         await _context.SaveChangesAsync(cancellationToken);
     }
