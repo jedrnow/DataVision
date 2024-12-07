@@ -1,8 +1,12 @@
-﻿namespace DataVision.Application.Databases.Commands.UpdateDatabase;
+﻿using DataVision.Application.Common.Interfaces;
+
+namespace DataVision.Application.Databases.Commands.UpdateDatabase;
 public class UpdateDatabaseCommandValidator : AbstractValidator<UpdateDatabaseCommand>
 {
-    public UpdateDatabaseCommandValidator()
+    public UpdateDatabaseCommandValidator(IExistenceService existenceService)
     {
+        RuleFor(v => v.Id).MustAsync(existenceService.DatabaseExistsAsync);
+
         RuleFor(v => v.Name)
             .NotEmpty()
             .MaximumLength(200);

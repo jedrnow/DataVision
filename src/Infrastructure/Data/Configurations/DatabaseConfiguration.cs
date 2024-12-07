@@ -14,5 +14,9 @@ public class DatabaseConfiguration : IEntityTypeConfiguration<Database>
 
         builder.Property(t => t.ConnectionString)
             .IsRequired();
+
+        builder.HasMany(t => t.DatabaseTables)
+            .WithOne(dt => dt.Database)
+            .HasForeignKey(t => t.DatabaseId);
     }
 }

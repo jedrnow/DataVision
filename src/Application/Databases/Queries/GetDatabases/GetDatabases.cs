@@ -5,8 +5,7 @@ namespace DataVision.Application.Databases.Queries.GetDatabases;
 
 public record GetDatabasesQuery : IRequest<PaginatedList<DatabaseDto>>
 {
-    public int PageNumber { get; init; }
-    public int PageSize { get; init; }
+    public required PaginatedQuery PaginatedQuery { get; init; }
 }
 
 public class GetDatabasesQueryHandler : IRequestHandler<GetDatabasesQuery, PaginatedList<DatabaseDto>>
@@ -27,7 +26,7 @@ public class GetDatabasesQueryHandler : IRequestHandler<GetDatabasesQuery, Pagin
             .OrderBy(x => x.Created)
             .ProjectTo<DatabaseDto>(_mapper.ConfigurationProvider);
 
-        var paginatedDatabasesList = await PaginatedList<DatabaseDto>.CreateAsync(databases, request.PageNumber, request.PageSize);
+        var paginatedDatabasesList = await PaginatedList<DatabaseDto>.CreateAsync(databases, request.PaginatedQuery.PageNumber, request.PaginatedQuery.PageSize);
 
         return paginatedDatabasesList;
     }

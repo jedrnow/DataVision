@@ -23,13 +23,16 @@ public class Databases : EndpointGroupBase
     {
         var query = new GetDatabasesQuery()
         {
-            PageNumber = pageNumber,
-            PageSize = pageSize
+            PaginatedQuery = new PaginatedQuery()
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            }
         };
 
-        var vm = await sender.Send(query);
+        var result = await sender.Send(query);
 
-        return TypedResults.Ok(vm);
+        return TypedResults.Ok(result);
     }
 
     public async Task<Created<int>> CreateDatabase(ISender sender, CreateDatabaseCommand command)
