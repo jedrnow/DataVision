@@ -1,0 +1,18 @@
+<h1 id="tableLabel">Databases</h1>
+
+<table class='table table-striped' aria-labelledby="tableLabel">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Connection string</th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (db of databases; track $index) {
+    <tr>
+      <td>{{ db.name | date }}</td>
+      <td>{{ db.connectionString }}</td>
+    </tr>
+    }
+  </tbody>
+</table>

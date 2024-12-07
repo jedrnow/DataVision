@@ -11,12 +11,12 @@ public class Databases : EndpointGroupBase
 {
     public override void Map(WebApplication app)
     {
-        //app.MapGroup(this)
-        //    .RequireAuthorization()
-        //    .MapGet(GetDatabases)
-        //    .MapPost(CreateDatabase)
-        //    .MapPut(UpdateDatabase, "{id}")
-        //    .MapDelete(DeleteDatabase, "{id}");
+        app.MapGroup(this)
+            .RequireAuthorization()
+            .MapGet(GetDatabases)
+            .MapPost(CreateDatabase)
+            .MapPut(UpdateDatabase, "{id}")
+            .MapDelete(DeleteDatabase, "{id}");
     }
 
     public async Task<Ok<PaginatedList<DatabaseDto>>> GetDatabases(ISender sender, int pageNumber, int pageSize)

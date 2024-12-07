@@ -14,6 +14,7 @@ import { FetchDataComponent } from './fetch-data/fetch-data.component';
 import { TodoComponent } from './todo/todo.component';
 import { AuthorizeInterceptor } from 'src/api-authorization/authorize.interceptor';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { DatabasesComponent } from './databases/databases.component';
 
 @NgModule({
     declarations: [
@@ -22,7 +23,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
         HomeComponent,
         CounterComponent,
         FetchDataComponent,
-        TodoComponent
+        TodoComponent,
+        DatabasesComponent
     ],
     bootstrap: [AppComponent],
     imports: [
@@ -32,7 +34,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
             { path: '', component: HomeComponent, pathMatch: 'full' },
             { path: 'counter', component: CounterComponent },
             { path: 'fetch-data', component: FetchDataComponent },
-            { path: 'todo', component: TodoComponent }
+            { path: 'todo', component: TodoComponent },
+            { path: 'databases', component: DatabasesComponent }
         ]),
         BrowserAnimationsModule,
         ModalModule.forRoot()],
