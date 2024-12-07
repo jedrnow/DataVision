@@ -6,7 +6,6 @@
     <SpaProxyLaunchCommand>npm start</SpaProxyLaunchCommand>
     <RootNamespace>DataVision.Web</RootNamespace>
     <AssemblyName>DataVision.Web</AssemblyName>
-    <UserSecretsId>fde52751-b4f6-4c5b-bf14-00c5048f3343</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
