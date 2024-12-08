@@ -791,6 +791,7 @@ export interface IPaginatedListOfDatabaseTableRowDto {
 
 export class DatabaseTableRowDto implements IDatabaseTableRowDto {
     id?: number;
+    cells?: DatabaseTableCellDto[];
 
     constructor(data?: IDatabaseTableRowDto) {
         if (data) {
@@ -804,6 +805,11 @@ export class DatabaseTableRowDto implements IDatabaseTableRowDto {
     init(_data?: any) {
         if (_data) {
             this.id = _data["id"];
+            if (Array.isArray(_data["cells"])) {
+                this.cells = [] as any;
+                for (let item of _data["cells"])
+                    this.cells!.push(DatabaseTableCellDto.fromJS(item));
+            }
         }
     }
 
@@ -817,12 +823,82 @@ export class DatabaseTableRowDto implements IDatabaseTableRowDto {
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
         data["id"] = this.id;
+        if (Array.isArray(this.cells)) {
+            data["cells"] = [];
+            for (let item of this.cells)
+                data["cells"].push(item.toJSON());
+        }
         return data;
     }
 }
 
 export interface IDatabaseTableRowDto {
     id?: number;
+    cells?: DatabaseTableCellDto[];
+}
+
+export class DatabaseTableCellDto implements IDatabaseTableCellDto {
+    id?: number;
+    type?: DataType2;
+    value?: string | undefined;
+
+    constructor(data?: IDatabaseTableCellDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.type = _data["type"];
+            this.value = _data["value"];
+        }
+    }
+
+    static fromJS(data: any): DatabaseTableCellDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new DatabaseTableCellDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["type"] = this.type;
+        data["value"] = this.value;
+        return data;
+    }
+}
+
+export interface IDatabaseTableCellDto {
+    id?: number;
+    type?: DataType2;
+    value?: string | undefined;
+}
+
+export enum DataType2 {
+    Custom = 0,
+    DateTime = 1,
+    Date = 2,
+    Time = 3,
+    Duration = 4,
+    PhoneNumber = 5,
+    Currency = 6,
+    Text = 7,
+    Html = 8,
+    MultilineText = 9,
+    EmailAddress = 10,
+    Password = 11,
+    Url = 12,
+    ImageUrl = 13,
+    CreditCard = 14,
+    PostalCode = 15,
+    Upload = 16,
 }
 
 export class PaginatedListOfDatabaseTableDto implements IPaginatedListOfDatabaseTableDto {

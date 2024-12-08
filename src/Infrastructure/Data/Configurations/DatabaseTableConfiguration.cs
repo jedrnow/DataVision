@@ -19,6 +19,11 @@ public class DatabaseTableConfiguration : IEntityTypeConfiguration<DatabaseTable
             .WithOne(r => r.DatabaseTable)
             .HasForeignKey(r => r.DatabaseTableId)
             .OnDelete(DeleteBehavior.ClientCascade);
+
+        builder.HasMany(t => t.Cells)
+            .WithOne(c => c.DatabaseTable)
+            .HasForeignKey(c => c.DatabaseTableId)
+            .OnDelete(DeleteBehavior.ClientCascade);
     }
 }
 

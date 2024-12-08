@@ -24,6 +24,7 @@ public class GetDatabaseTableRowsQueryHandler : IRequestHandler<GetDatabaseTable
     {
         var databaseTableRows = _context.DatabaseTableRows
             .AsNoTracking()
+            .Include(x => x.Cells)
             .Where(x => x.DatabaseTableId == request.DatabaseTableId)
             .OrderBy(x => x.Created)
             .ProjectTo<DatabaseTableRowDto>(_mapper.ConfigurationProvider);

@@ -7,6 +7,7 @@ public class DatabaseTableColumn : BaseAuditableEntity
     public DataType Type { get; set; }
     public int DatabaseTableId { get; set; }
     public DatabaseTable? DatabaseTable { get; set; }
+    public IList<DatabaseTableCell> Cells { get; private set; } = new List<DatabaseTableCell>();
     public void Update(string? name, DataType type, string? userId = null)
     {
         Name = name;
