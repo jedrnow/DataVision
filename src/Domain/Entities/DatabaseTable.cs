@@ -5,6 +5,7 @@ public class DatabaseTable : BaseAuditableEntity
     public int DatabaseId { get; set; }
     public Database? Database { get; set; }
     public IList<DatabaseTableColumn> Columns { get; private set; } = new List<DatabaseTableColumn>();
+    public IList<DatabaseTableRow> Rows { get; private set; } = new List<DatabaseTableRow>();
     public void Update(string? name, string? userId = null)
     {
         Name = name;

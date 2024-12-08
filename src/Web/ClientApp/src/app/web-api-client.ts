@@ -324,6 +324,84 @@ export class DatabaseTableColumnsClient implements IDatabaseTableColumnsClient {
     }
 }
 
+export interface IDatabaseTableRowsClient {
+    getDatabaseTableRows(databaseTableId: number, pageNumber: number, pageSize: number): Observable<PaginatedListOfDatabaseTableRowDto>;
+}
+
+@Injectable({
+    providedIn: 'root'
+})
+export class DatabaseTableRowsClient implements IDatabaseTableRowsClient {
+    private http: HttpClient;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
+        this.http = http;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    getDatabaseTableRows(databaseTableId: number, pageNumber: number, pageSize: number): Observable<PaginatedListOfDatabaseTableRowDto> {
+        let url_ = this.baseUrl + "/api/DatabaseTableRows?";
+        if (databaseTableId === undefined || databaseTableId === null)
+            throw new Error("The parameter 'databaseTableId' must be defined and cannot be null.");
+        else
+            url_ += "databaseTableId=" + encodeURIComponent("" + databaseTableId) + "&";
+        if (pageNumber === undefined || pageNumber === null)
+            throw new Error("The parameter 'pageNumber' must be defined and cannot be null.");
+        else
+            url_ += "pageNumber=" + encodeURIComponent("" + pageNumber) + "&";
+        if (pageSize === undefined || pageSize === null)
+            throw new Error("The parameter 'pageSize' must be defined and cannot be null.");
+        else
+            url_ += "pageSize=" + encodeURIComponent("" + pageSize) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetDatabaseTableRows(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetDatabaseTableRows(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<PaginatedListOfDatabaseTableRowDto>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<PaginatedListOfDatabaseTableRowDto>;
+        }));
+    }
+
+    protected processGetDatabaseTableRows(response: HttpResponseBase): Observable<PaginatedListOfDatabaseTableRowDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = PaginatedListOfDatabaseTableRowDto.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+}
+
 export interface IDatabaseTablesClient {
     getDatabaseTables(databaseId: number, pageNumber: number, pageSize: number): Observable<PaginatedListOfDatabaseTableDto>;
 }
@@ -645,6 +723,106 @@ export enum DataType {
     Bool = 3,
     DateTime = 4,
     Text = 5,
+}
+
+export class PaginatedListOfDatabaseTableRowDto implements IPaginatedListOfDatabaseTableRowDto {
+    items?: DatabaseTableRowDto[];
+    pageNumber?: number;
+    totalPages?: number;
+    totalCount?: number;
+    hasPreviousPage?: boolean;
+    hasNextPage?: boolean;
+
+    constructor(data?: IPaginatedListOfDatabaseTableRowDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            if (Array.isArray(_data["items"])) {
+                this.items = [] as any;
+                for (let item of _data["items"])
+                    this.items!.push(DatabaseTableRowDto.fromJS(item));
+            }
+            this.pageNumber = _data["pageNumber"];
+            this.totalPages = _data["totalPages"];
+            this.totalCount = _data["totalCount"];
+            this.hasPreviousPage = _data["hasPreviousPage"];
+            this.hasNextPage = _data["hasNextPage"];
+        }
+    }
+
+    static fromJS(data: any): PaginatedListOfDatabaseTableRowDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new PaginatedListOfDatabaseTableRowDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.items)) {
+            data["items"] = [];
+            for (let item of this.items)
+                data["items"].push(item.toJSON());
+        }
+        data["pageNumber"] = this.pageNumber;
+        data["totalPages"] = this.totalPages;
+        data["totalCount"] = this.totalCount;
+        data["hasPreviousPage"] = this.hasPreviousPage;
+        data["hasNextPage"] = this.hasNextPage;
+        return data;
+    }
+}
+
+export interface IPaginatedListOfDatabaseTableRowDto {
+    items?: DatabaseTableRowDto[];
+    pageNumber?: number;
+    totalPages?: number;
+    totalCount?: number;
+    hasPreviousPage?: boolean;
+    hasNextPage?: boolean;
+}
+
+export class DatabaseTableRowDto implements IDatabaseTableRowDto {
+    id?: number;
+
+    constructor(data?: IDatabaseTableRowDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+        }
+    }
+
+    static fromJS(data: any): DatabaseTableRowDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new DatabaseTableRowDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        return data;
+    }
+}
+
+export interface IDatabaseTableRowDto {
+    id?: number;
 }
 
 export class PaginatedListOfDatabaseTableDto implements IPaginatedListOfDatabaseTableDto {

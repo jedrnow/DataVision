@@ -7,6 +7,7 @@ public interface IApplicationDbContext
     DbSet<Database> Databases { get; }
     DbSet<DatabaseTable> DatabaseTables { get; }
     DbSet<DatabaseTableColumn> DatabaseTableColumns { get; }
+    DbSet<DatabaseTableRow> DatabaseTableRows {  get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

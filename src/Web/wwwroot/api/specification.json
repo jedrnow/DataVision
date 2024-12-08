@@ -177,6 +177,58 @@
         }
       }
     },
+    "/api/DatabaseTableRows": {
+      "get": {
+        "tags": [
+          "DatabaseTableRows"
+        ],
+        "operationId": "GetDatabaseTableRows",
+        "parameters": [
+          {
+            "name": "databaseTableId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 2
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 3
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedListOfDatabaseTableRowDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/DatabaseTables": {
       "get": {
         "tags": [
@@ -348,6 +400,46 @@
           4,
           5
         ]
+      },
+      "PaginatedListOfDatabaseTableRowDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DatabaseTableRowDto"
+            }
+          },
+          "pageNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "hasPreviousPage": {
+            "type": "boolean"
+          },
+          "hasNextPage": {
+            "type": "boolean"
+          }
+        }
+      },
+      "DatabaseTableRowDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
       },
       "PaginatedListOfDatabaseTableDto": {
         "type": "object",
