@@ -247,8 +247,85 @@ export class DatabasesClient implements IDatabasesClient {
     }
 }
 
+export interface IDatabaseTableColumnsClient {
+    getDatabaseTableColumns(databaseTableId: number): Observable<DatabaseTableColumnDto[]>;
+}
+
+@Injectable({
+    providedIn: 'root'
+})
+export class DatabaseTableColumnsClient implements IDatabaseTableColumnsClient {
+    private http: HttpClient;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
+        this.http = http;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    getDatabaseTableColumns(databaseTableId: number): Observable<DatabaseTableColumnDto[]> {
+        let url_ = this.baseUrl + "/api/DatabaseTableColumns?";
+        if (databaseTableId === undefined || databaseTableId === null)
+            throw new Error("The parameter 'databaseTableId' must be defined and cannot be null.");
+        else
+            url_ += "databaseTableId=" + encodeURIComponent("" + databaseTableId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetDatabaseTableColumns(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetDatabaseTableColumns(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<DatabaseTableColumnDto[]>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<DatabaseTableColumnDto[]>;
+        }));
+    }
+
+    protected processGetDatabaseTableColumns(response: HttpResponseBase): Observable<DatabaseTableColumnDto[]> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(DatabaseTableColumnDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+}
+
 export interface IDatabaseTablesClient {
-    getDatabaseTables(pageNumber: number, pageSize: number): Observable<PaginatedListOfDatabaseTableDto>;
+    getDatabaseTables(databaseId: number, pageNumber: number, pageSize: number): Observable<PaginatedListOfDatabaseTableDto>;
 }
 
 @Injectable({
@@ -264,8 +341,12 @@ export class DatabaseTablesClient implements IDatabaseTablesClient {
         this.baseUrl = baseUrl ?? "";
     }
 
-    getDatabaseTables(pageNumber: number, pageSize: number): Observable<PaginatedListOfDatabaseTableDto> {
+    getDatabaseTables(databaseId: number, pageNumber: number, pageSize: number): Observable<PaginatedListOfDatabaseTableDto> {
         let url_ = this.baseUrl + "/api/DatabaseTables?";
+        if (databaseId === undefined || databaseId === null)
+            throw new Error("The parameter 'databaseId' must be defined and cannot be null.");
+        else
+            url_ += "databaseId=" + encodeURIComponent("" + databaseId) + "&";
         if (pageNumber === undefined || pageNumber === null)
             throw new Error("The parameter 'pageNumber' must be defined and cannot be null.");
         else
@@ -511,6 +592,59 @@ export interface IUpdateDatabaseCommand {
     id?: number;
     name?: string | undefined;
     connectionString?: string | undefined;
+}
+
+export class DatabaseTableColumnDto implements IDatabaseTableColumnDto {
+    id?: number;
+    name?: string | undefined;
+    type?: DataType;
+
+    constructor(data?: IDatabaseTableColumnDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.name = _data["name"];
+            this.type = _data["type"];
+        }
+    }
+
+    static fromJS(data: any): DatabaseTableColumnDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new DatabaseTableColumnDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["name"] = this.name;
+        data["type"] = this.type;
+        return data;
+    }
+}
+
+export interface IDatabaseTableColumnDto {
+    id?: number;
+    name?: string | undefined;
+    type?: DataType;
+}
+
+export enum DataType {
+    Unknown = 0,
+    Int = 1,
+    Decimal = 2,
+    Bool = 3,
+    DateTime = 4,
+    Text = 5,
 }
 
 export class PaginatedListOfDatabaseTableDto implements IPaginatedListOfDatabaseTableDto {

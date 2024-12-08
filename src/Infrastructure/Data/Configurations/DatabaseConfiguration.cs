@@ -17,6 +17,7 @@ public class DatabaseConfiguration : IEntityTypeConfiguration<Database>
 
         builder.HasMany(t => t.DatabaseTables)
             .WithOne(dt => dt.Database)
-            .HasForeignKey(t => t.DatabaseId);
+            .HasForeignKey(t => t.DatabaseId)
+            .OnDelete(DeleteBehavior.ClientCascade);
     }
 }

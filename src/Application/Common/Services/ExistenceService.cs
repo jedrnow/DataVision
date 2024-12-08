@@ -17,4 +17,13 @@ public class ExistenceService : IExistenceService
 
         return database != null;
     }
+
+    public async Task<bool> DatabaseTableExistsAsync(int databaseTableId, CancellationToken cancellationToken = default)
+    {
+        var database = await _context.DatabaseTables
+            .AsNoTracking()
+            .SingleOrDefaultAsync(cancellationToken);
+
+        return database != null;
+    }
 }

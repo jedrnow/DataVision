@@ -12,6 +12,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IApplica
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
     public DbSet<Database> Databases => Set<Database>();
     public DbSet<DatabaseTable> DatabaseTables => Set<DatabaseTable>();
+    public DbSet<DatabaseTableColumn> DatabaseTableColumns => Set<DatabaseTableColumn>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

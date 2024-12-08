@@ -9,6 +9,11 @@ public class DatabaseTableConfiguration : IEntityTypeConfiguration<DatabaseTable
     {
         builder.Property(t => t.Name)
             .IsRequired();
+
+        builder.HasMany(t => t.Columns)
+            .WithOne(c => c.DatabaseTable)
+            .HasForeignKey(c => c.DatabaseTableId)
+            .OnDelete(DeleteBehavior.ClientCascade);
     }
 }
 

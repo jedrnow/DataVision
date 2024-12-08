@@ -1,8 +1,4 @@
 ﻿using DataVision.Application.Common.Models;
-using DataVision.Application.Databases.Commands.CreateDatabase;
-using DataVision.Application.Databases.Commands.DeleteDatabase;
-using DataVision.Application.Databases.Commands.UpdateDatabase;
-using DataVision.Application.Databases.Queries.GetDatabases;
 using DataVision.Application.DatabaseTables.Queries.GetDatabaseTables;
 using Microsoft.AspNetCore.Http.HttpResults;
 
@@ -17,10 +13,11 @@ public class DatabaseTables : EndpointGroupBase
             .MapGet(GetDatabaseTables);
     }
 
-    public async Task<Ok<PaginatedList<DatabaseTableDto>>> GetDatabaseTables(ISender sender, int pageNumber, int pageSize)
+    public async Task<Ok<PaginatedList<DatabaseTableDto>>> GetDatabaseTables(ISender sender, int databaseId, int pageNumber, int pageSize)
     {
         var query = new GetDatabaseTablesQuery()
         {
+            DatabaseId = databaseId,
             PaginatedQuery = new PaginatedQuery()
             {
                 PageNumber = pageNumber,
