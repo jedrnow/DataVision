@@ -15,6 +15,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IApplica
     public DbSet<DatabaseTableColumn> DatabaseTableColumns => Set<DatabaseTableColumn>();
     public DbSet<DatabaseTableRow> DatabaseTableRows => Set<DatabaseTableRow>();
     public DbSet<DatabaseTableCell> DatabaseTableCells => Set<DatabaseTableCell>();
+    public DbSet<BackgroundJob> BackgroundJobs => Set<BackgroundJob>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

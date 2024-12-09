@@ -4,6 +4,7 @@ using DataVision.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataVision.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241208182049_UpdateDatabaseFields")]
+    partial class UpdateDatabaseFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,46 +24,6 @@ namespace DataVision.Infrastructure.Data.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("DataVision.Domain.Entities.BackgroundJob", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTimeOffset>("Created")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<long>("ExternalJobId")
-                        .HasColumnType("bigint");
-
-                    b.Property<bool>("IsCompleted")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsSucceeded")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTimeOffset>("LastModified")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("LastModifiedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Message")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Result")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("BackgroundJobs");
-                });
 
             modelBuilder.Entity("DataVision.Domain.Entities.Database", b =>
                 {
@@ -150,9 +113,6 @@ namespace DataVision.Infrastructure.Data.Migrations
                     b.Property<string>("CreatedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("DatabaseId")
-                        .HasColumnType("int");
-
                     b.Property<int>("DatabaseTableColumnId")
                         .HasColumnType("int");
 
@@ -175,8 +135,6 @@ namespace DataVision.Infrastructure.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("DatabaseId");
 
                     b.HasIndex("DatabaseTableColumnId");
 
@@ -201,9 +159,6 @@ namespace DataVision.Infrastructure.Data.Migrations
                     b.Property<string>("CreatedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("DatabaseId")
-                        .HasColumnType("int");
-
                     b.Property<int>("DatabaseTableId")
                         .HasColumnType("int");
 
@@ -221,8 +176,6 @@ namespace DataVision.Infrastructure.Data.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("DatabaseId");
 
                     b.HasIndex("DatabaseTableId");
 
@@ -243,9 +196,6 @@ namespace DataVision.Infrastructure.Data.Migrations
                     b.Property<string>("CreatedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("DatabaseId")
-                        .HasColumnType("int");
-
                     b.Property<int>("DatabaseTableId")
                         .HasColumnType("int");
 
@@ -256,8 +206,6 @@ namespace DataVision.Infrastructure.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("DatabaseId");
 
                     b.HasIndex("DatabaseTableId");
 
@@ -479,12 +427,6 @@ namespace DataVision.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("DataVision.Domain.Entities.DatabaseTableCell", b =>
                 {
-                    b.HasOne("DataVision.Domain.Entities.Database", "Database")
-                        .WithMany("DatabaseTableCells")
-                        .HasForeignKey("DatabaseId")
-                        .OnDelete(DeleteBehavior.ClientCascade)
-                        .IsRequired();
-
                     b.HasOne("DataVision.Domain.Entities.DatabaseTableColumn", "DatabaseTableColumn")
                         .WithMany("Cells")
                         .HasForeignKey("DatabaseTableColumnId")
@@ -503,8 +445,6 @@ namespace DataVision.Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
-                    b.Navigation("Database");
-
                     b.Navigation("DatabaseTable");
 
                     b.Navigation("DatabaseTableColumn");
@@ -514,38 +454,22 @@ namespace DataVision.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("DataVision.Domain.Entities.DatabaseTableColumn", b =>
                 {
-                    b.HasOne("DataVision.Domain.Entities.Database", "Database")
-                        .WithMany("DatabaseTableColumns")
-                        .HasForeignKey("DatabaseId")
-                        .OnDelete(DeleteBehavior.ClientCascade)
-                        .IsRequired();
-
                     b.HasOne("DataVision.Domain.Entities.DatabaseTable", "DatabaseTable")
                         .WithMany("Columns")
                         .HasForeignKey("DatabaseTableId")
                         .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
-                    b.Navigation("Database");
-
                     b.Navigation("DatabaseTable");
                 });
 
             modelBuilder.Entity("DataVision.Domain.Entities.DatabaseTableRow", b =>
                 {
-                    b.HasOne("DataVision.Domain.Entities.Database", "Database")
-                        .WithMany("DatabaseTableRows")
-                        .HasForeignKey("DatabaseId")
-                        .OnDelete(DeleteBehavior.ClientCascade)
-                        .IsRequired();
-
                     b.HasOne("DataVision.Domain.Entities.DatabaseTable", "DatabaseTable")
                         .WithMany("Rows")
                         .HasForeignKey("DatabaseTableId")
                         .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
-
-                    b.Navigation("Database");
 
                     b.Navigation("DatabaseTable");
                 });
@@ -603,12 +527,6 @@ namespace DataVision.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("DataVision.Domain.Entities.Database", b =>
                 {
-                    b.Navigation("DatabaseTableCells");
-
-                    b.Navigation("DatabaseTableColumns");
-
-                    b.Navigation("DatabaseTableRows");
-
                     b.Navigation("DatabaseTables");
                 });
 

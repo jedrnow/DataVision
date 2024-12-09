@@ -3,6 +3,7 @@ using DataVision.Domain.Constants;
 using DataVision.Infrastructure.Data;
 using DataVision.Infrastructure.Data.Interceptors;
 using DataVision.Infrastructure.Identity;
+using Hangfire;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -41,5 +42,13 @@ public static class DependencyInjection
 
         builder.Services.AddAuthorization(options =>
             options.AddPolicy(Policies.CanPurge, policy => policy.RequireRole(Roles.Administrator)));
+
+        builder.Services.AddHangfire(configuration => configuration
+            .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+            .UseSimpleAssemblyNameTypeSerializer()
+            .UseRecommendedSerializerSettings()
+            .UseSqlServerStorage(builder.Configuration.GetConnectionString("HangfireConnection")));
+
+        builder.Services.AddHangfireServer();
     }
 }

@@ -9,6 +9,7 @@ public interface IApplicationDbContext
     DbSet<DatabaseTableColumn> DatabaseTableColumns { get; }
     DbSet<DatabaseTableRow> DatabaseTableRows {  get; }
     DbSet<DatabaseTableCell> DatabaseTableCells { get; }
+    DbSet<BackgroundJob> BackgroundJobs { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

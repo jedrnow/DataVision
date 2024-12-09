@@ -1,6 +1,7 @@
 ﻿using DataVision.Application.Common.Models;
 using DataVision.Application.Databases.Commands.CreateDatabase;
 using DataVision.Application.Databases.Commands.DeleteDatabase;
+using DataVision.Application.Databases.Commands.PopulateDatabase;
 using DataVision.Application.Databases.Commands.UpdateDatabase;
 using DataVision.Application.Databases.Queries.GetDatabases;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -15,6 +16,7 @@ public class Databases : EndpointGroupBase
             .RequireAuthorization()
             .MapGet(GetDatabases)
             .MapPost(CreateDatabase)
+            .MapPost(PopulateDatabase, "{id}")
             .MapPut(UpdateDatabase, "{id}")
             .MapDelete(DeleteDatabase, "{id}");
     }
@@ -58,5 +60,14 @@ public class Databases : EndpointGroupBase
         await sender.Send(command);
 
         return TypedResults.NoContent();
+    }
+
+    public async Task<Ok<DatabaseMappingResult>> PopulateDatabase(ISender sender, int id)
+    {
+        var command = new PopulateDatabaseCommand() { DatabaseId = id };
+
+        var result = await sender.Send(command);
+
+        return TypedResults.Ok(result);
     }
 }

@@ -5,6 +5,8 @@ public class DatabaseTableColumn : BaseAuditableEntity
 {
     public string? Name { get; set; }
     public DataType Type { get; set; }
+    public int DatabaseId { get; set; }
+    public Database? Database { get; set; }
     public int DatabaseTableId { get; set; }
     public DatabaseTable? DatabaseTable { get; set; }
     public IList<DatabaseTableCell> Cells { get; private set; } = new List<DatabaseTableCell>();

@@ -22,7 +22,20 @@ public class DeleteDatabaseCommandHandler : IRequestHandler<DeleteDatabaseComman
 
         Guard.Against.NotFound(request.Id, database);
 
+        var tables = await _context.DatabaseTables
+            .Include(x => x.Columns)
+            .Include(x => x.Cells)
+            .Where(x => x.DatabaseId == database.Id)
+            .ToListAsync(cancellationToken);
+
+        var columns = tables.SelectMany(x => x.Columns);
+
+        var cells = tables.SelectMany(x => x.Cells);
+
         _context.Databases.Remove(database);
+        _context.DatabaseTables.RemoveRange(tables);
+        _context.DatabaseTableColumns.RemoveRange(columns);
+        _context.DatabaseTableCells.RemoveRange(cells);
 
         await _context.SaveChangesAsync(cancellationToken);
     }

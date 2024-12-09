@@ -1,5 +1,6 @@
 ﻿using DataVision.Application.Common.Interfaces;
 using DataVision.Domain.Entities;
+using DataVision.Domain.Enums;
 
 namespace DataVision.Application.Databases.Commands.CreateDatabase;
 
@@ -7,6 +8,7 @@ public record CreateDatabaseCommand : IRequest<int>
 {
     public string? Name { get; init; }
     public string? ConnectionString { get; init; }
+    public DatabaseProvider DatabaseProvider { get; init; }
 }
 
 public class CreateDatabaseCommandHandler : IRequestHandler<CreateDatabaseCommand, int>
@@ -23,7 +25,8 @@ public class CreateDatabaseCommandHandler : IRequestHandler<CreateDatabaseComman
         var database = new Database()
         {
             Name = request.Name,
-            ConnectionString = request.ConnectionString
+            ConnectionString = request.ConnectionString,
+            Provider = request.DatabaseProvider,
         };
 
         _context.Databases.Add(database);

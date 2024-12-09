@@ -1,4 +1,5 @@
 using DataVision.Infrastructure.Data;
+using Hangfire;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,6 +44,7 @@ app.UseExceptionHandler(options => { });
 
 
 app.MapEndpoints();
+app.MapHangfireDashboard();
 
 app.Run();
 

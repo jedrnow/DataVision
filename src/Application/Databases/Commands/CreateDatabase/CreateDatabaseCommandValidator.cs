@@ -12,6 +12,9 @@ public class CreateDatabaseCommandValidator : AbstractValidator<CreateDatabaseCo
             .MustAsync(BeValidConnection)
                 .WithMessage("'{PropertyName}' must provide valid connection")
                 .WithErrorCode("400");
+
+        RuleFor(v => v.DatabaseProvider)
+            .IsInEnum();
     }
 
     public async Task<bool> BeValidConnection(string? connectionString, CancellationToken cancellationToken)

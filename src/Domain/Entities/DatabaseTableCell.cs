@@ -3,6 +3,8 @@
 namespace DataVision.Domain.Entities;
 public class DatabaseTableCell : BaseAuditableEntity
 {
+    public int DatabaseId { get; set; }
+    public Database? Database { get; set; }
     public int DatabaseTableId { get; set; }
     public DatabaseTable? DatabaseTable { get; set; }
     public int DatabaseTableRowId { get; set; }

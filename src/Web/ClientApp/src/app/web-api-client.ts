@@ -18,6 +18,7 @@ export const API_BASE_URL = new InjectionToken<string>('API_BASE_URL');
 export interface IDatabasesClient {
     getDatabases(pageNumber: number, pageSize: number): Observable<PaginatedListOfDatabaseDto>;
     createDatabase(command: CreateDatabaseCommand): Observable<number>;
+    populateDatabase(id: number): Observable<DatabaseMappingResult>;
     updateDatabase(id: number, command: UpdateDatabaseCommand): Observable<void>;
     deleteDatabase(id: number): Observable<void>;
 }
@@ -135,6 +136,57 @@ export class DatabasesClient implements IDatabasesClient {
                 result201 = resultData201 !== undefined ? resultData201 : <any>null;
     
             return _observableOf(result201);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    populateDatabase(id: number): Observable<DatabaseMappingResult> {
+        let url_ = this.baseUrl + "/api/Databases/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processPopulateDatabase(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processPopulateDatabase(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<DatabaseMappingResult>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<DatabaseMappingResult>;
+        }));
+    }
+
+    protected processPopulateDatabase(response: HttpResponseBase): Observable<DatabaseMappingResult> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = DatabaseMappingResult.fromJS(resultData200);
+            return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -591,6 +643,7 @@ export interface IDatabaseDto {
 export class CreateDatabaseCommand implements ICreateDatabaseCommand {
     name?: string | undefined;
     connectionString?: string | undefined;
+    databaseProvider?: DatabaseProvider;
 
     constructor(data?: ICreateDatabaseCommand) {
         if (data) {
@@ -605,6 +658,7 @@ export class CreateDatabaseCommand implements ICreateDatabaseCommand {
         if (_data) {
             this.name = _data["name"];
             this.connectionString = _data["connectionString"];
+            this.databaseProvider = _data["databaseProvider"];
         }
     }
 
@@ -619,6 +673,7 @@ export class CreateDatabaseCommand implements ICreateDatabaseCommand {
         data = typeof data === 'object' ? data : {};
         data["name"] = this.name;
         data["connectionString"] = this.connectionString;
+        data["databaseProvider"] = this.databaseProvider;
         return data;
     }
 }
@@ -626,6 +681,81 @@ export class CreateDatabaseCommand implements ICreateDatabaseCommand {
 export interface ICreateDatabaseCommand {
     name?: string | undefined;
     connectionString?: string | undefined;
+    databaseProvider?: DatabaseProvider;
+}
+
+export enum DatabaseProvider {
+    SQLServer = "SQLServer",
+    MySQL = "MySQL",
+    PostgreSQL = "PostgreSQL",
+}
+
+export class DatabaseMappingResult implements IDatabaseMappingResult {
+    success?: boolean;
+    databaseName?: string;
+    tablesTotal?: number;
+    tableNames?: string[];
+    errors?: string[];
+
+    constructor(data?: IDatabaseMappingResult) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.success = _data["success"];
+            this.databaseName = _data["databaseName"];
+            this.tablesTotal = _data["tablesTotal"];
+            if (Array.isArray(_data["tableNames"])) {
+                this.tableNames = [] as any;
+                for (let item of _data["tableNames"])
+                    this.tableNames!.push(item);
+            }
+            if (Array.isArray(_data["errors"])) {
+                this.errors = [] as any;
+                for (let item of _data["errors"])
+                    this.errors!.push(item);
+            }
+        }
+    }
+
+    static fromJS(data: any): DatabaseMappingResult {
+        data = typeof data === 'object' ? data : {};
+        let result = new DatabaseMappingResult();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["success"] = this.success;
+        data["databaseName"] = this.databaseName;
+        data["tablesTotal"] = this.tablesTotal;
+        if (Array.isArray(this.tableNames)) {
+            data["tableNames"] = [];
+            for (let item of this.tableNames)
+                data["tableNames"].push(item);
+        }
+        if (Array.isArray(this.errors)) {
+            data["errors"] = [];
+            for (let item of this.errors)
+                data["errors"].push(item);
+        }
+        return data;
+    }
+}
+
+export interface IDatabaseMappingResult {
+    success?: boolean;
+    databaseName?: string;
+    tablesTotal?: number;
+    tableNames?: string[];
+    errors?: string[];
 }
 
 export class UpdateDatabaseCommand implements IUpdateDatabaseCommand {
@@ -719,10 +849,18 @@ export interface IDatabaseTableColumnDto {
 export enum DataType {
     Unknown = 0,
     Int = 1,
-    Decimal = 2,
-    Bool = 3,
-    DateTime = 4,
-    Text = 5,
+    Long = 2,
+    Decimal = 3,
+    Bool = 4,
+    DateTime = 5,
+    String = 6,
+    Guid = 7,
+    Binary = 8,
+    Float = 9,
+    Double = 10,
+    TimeSpan = 11,
+    Date = 12,
+    Time = 13,
 }
 
 export class PaginatedListOfDatabaseTableRowDto implements IPaginatedListOfDatabaseTableRowDto {

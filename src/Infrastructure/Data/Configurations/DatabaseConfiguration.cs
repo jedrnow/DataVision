@@ -19,5 +19,20 @@ public class DatabaseConfiguration : IEntityTypeConfiguration<Database>
             .WithOne(dt => dt.Database)
             .HasForeignKey(t => t.DatabaseId)
             .OnDelete(DeleteBehavior.ClientCascade);
+
+        builder.HasMany(t => t.DatabaseTableColumns)
+            .WithOne(dt => dt.Database)
+            .HasForeignKey(t => t.DatabaseId)
+            .OnDelete(DeleteBehavior.ClientCascade);
+
+        builder.HasMany(t => t.DatabaseTableRows)
+            .WithOne(dt => dt.Database)
+            .HasForeignKey(t => t.DatabaseId)
+            .OnDelete(DeleteBehavior.ClientCascade);
+
+        builder.HasMany(t => t.DatabaseTableCells)
+            .WithOne(dt => dt.Database)
+            .HasForeignKey(t => t.DatabaseId)
+            .OnDelete(DeleteBehavior.ClientCascade);
     }
 }

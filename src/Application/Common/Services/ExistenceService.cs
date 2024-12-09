@@ -13,7 +13,7 @@ public class ExistenceService : IExistenceService
     {
         var database = await _context.Databases
             .AsNoTracking()
-            .SingleOrDefaultAsync(cancellationToken);
+            .SingleOrDefaultAsync(x => x.Id == databaseId, cancellationToken);
 
         return database != null;
     }
@@ -22,7 +22,7 @@ public class ExistenceService : IExistenceService
     {
         var database = await _context.DatabaseTables
             .AsNoTracking()
-            .SingleOrDefaultAsync(cancellationToken);
+            .SingleOrDefaultAsync(x => x.Id == databaseTableId, cancellationToken);
 
         return database != null;
     }
