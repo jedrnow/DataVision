@@ -13,10 +13,10 @@ public class Databases : EndpointGroupBase
     public override void Map(WebApplication app)
     {
         app.MapGroup(this)
-            //.RequireAuthorization()
+            .RequireAuthorization()
             .MapGet(GetDatabases)
             .MapPost(CreateDatabase)
-            .MapPost(PopulateDatabase, "{id}")
+            .MapPost(PopulateDatabase, "{id}/Populate")
             .MapPut(UpdateDatabase, "{id}")
             .MapDelete(DeleteDatabase, "{id}");
     }

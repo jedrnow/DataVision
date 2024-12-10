@@ -24,7 +24,7 @@ public class DeleteDatabaseCommandHandler : IRequestHandler<DeleteDatabaseComman
         _context.BackgroundJobs.Add(job);
         await _context.SaveChangesAsync(cancellationToken);
 
-        var externalJobId = Hangfire.BackgroundJob.Enqueue<ClearDatabaseJob>(x => x.Run(job.Id, request.Id, false, cancellationToken));
+        var externalJobId = Hangfire.BackgroundJob.Enqueue<ClearDatabaseJob>(x => x.Run(job.Id, request.Id, true, cancellationToken));
 
         job.ExternalJobId = externalJobId;
         _context.BackgroundJobs.Update(job);
