@@ -13,7 +13,7 @@ public class Databases : EndpointGroupBase
     public override void Map(WebApplication app)
     {
         app.MapGroup(this)
-            .RequireAuthorization()
+            //.RequireAuthorization()
             .MapGet(GetDatabases)
             .MapPost(CreateDatabase)
             .MapPost(PopulateDatabase, "{id}")
@@ -62,7 +62,7 @@ public class Databases : EndpointGroupBase
         return TypedResults.NoContent();
     }
 
-    public async Task<Ok<DatabaseMappingResult>> PopulateDatabase(ISender sender, int id)
+    public async Task<Ok<int>> PopulateDatabase(ISender sender, int id)
     {
         var command = new PopulateDatabaseCommand() { DatabaseId = id };
 

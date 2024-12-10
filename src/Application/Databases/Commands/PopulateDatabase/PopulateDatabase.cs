@@ -1,59 +1,40 @@
-﻿using DataVision.Application.Common.Factories;
-using DataVision.Application.Common.Interfaces;
-using DataVision.Application.Common.Models;
+﻿using DataVision.Application.Common.Interfaces;
+using DataVision.Application.Common.Jobs;
 using DataVision.Domain.Entities;
 
 namespace DataVision.Application.Databases.Commands.PopulateDatabase;
-public record PopulateDatabaseCommand : IRequest<DatabaseMappingResult>
+public record PopulateDatabaseCommand : IRequest<int>
 {
     public int DatabaseId { get; set; }
 }
 
-public class PopulateDatabaseCommandHandler : IRequestHandler<PopulateDatabaseCommand, DatabaseMappingResult>
+public class PopulateDatabaseCommandHandler : IRequestHandler<PopulateDatabaseCommand, int>
 {
     private readonly IApplicationDbContext _context;
-    private readonly IDatabaseMapperService _dbMapperService;
 
-    public PopulateDatabaseCommandHandler(IApplicationDbContext context, IDatabaseMapperService dbMapperService)
+    public PopulateDatabaseCommandHandler(IApplicationDbContext context)
     {
         _context = context;
-        _dbMapperService = dbMapperService;
     }
 
-    public async Task<DatabaseMappingResult> Handle(PopulateDatabaseCommand request, CancellationToken cancellationToken)
+    public async Task<int> Handle(PopulateDatabaseCommand request, CancellationToken cancellationToken)
     {
         var database = await _context.Databases.SingleOrDefaultAsync(x => x.Id == request.DatabaseId, cancellationToken);
 
         Guard.Against.NotFound(request.DatabaseId, database);
         Guard.Against.NullOrEmpty(database.ConnectionString, parameterName: nameof(Database.ConnectionString));
 
-        var dbAdapter = DatabaseAdapterFactory.CreateAdapter(database.Provider, database.ConnectionString);
+        var job = new BackgroundJob();
+        _context.BackgroundJobs.Add(job);
+        await _context.SaveChangesAsync(cancellationToken);
 
-        var connectionIsAvailable = await dbAdapter.CanConnectAsync();
-        if (!connectionIsAvailable)
-        {
-            throw new InvalidOperationException("Cannot connect to given database.");
-        }
+        var externalJobId = Hangfire.BackgroundJob.Enqueue<PopulateDatabaseJob>(x => x.Run(job.Id, request.DatabaseId, cancellationToken));
 
-        var databaseFetchingResult = await dbAdapter.FetchDatabaseAsync();
-        if (databaseFetchingResult == null || !databaseFetchingResult.Success)
-        {
-            return new DatabaseMappingResult()
-            {
-                Success = false,
-                DatabaseName = database.Name ?? "",
-                Errors = databaseFetchingResult?.Errors ?? []
-            };
-        }
+        job.ExternalJobId = externalJobId;
+        _context.BackgroundJobs.Update(job);
+        await _context.SaveChangesAsync(cancellationToken);
 
-        var result = await _dbMapperService.MapDatabase(request.DatabaseId, databaseFetchingResult.Tables);
-        if (result.Success)
-        {
-            database.IsPopulated = true;
-            await _context.SaveChangesAsync(cancellationToken);
-        }
-
-        return result;
+        return job.Id;
     }
 }
 

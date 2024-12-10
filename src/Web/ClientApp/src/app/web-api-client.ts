@@ -18,7 +18,7 @@ export const API_BASE_URL = new InjectionToken<string>('API_BASE_URL');
 export interface IDatabasesClient {
     getDatabases(pageNumber: number, pageSize: number): Observable<PaginatedListOfDatabaseDto>;
     createDatabase(command: CreateDatabaseCommand): Observable<number>;
-    populateDatabase(id: number): Observable<DatabaseMappingResult>;
+    populateDatabase(id: number): Observable<number>;
     updateDatabase(id: number, command: UpdateDatabaseCommand): Observable<void>;
     deleteDatabase(id: number): Observable<void>;
 }
@@ -145,7 +145,7 @@ export class DatabasesClient implements IDatabasesClient {
         return _observableOf(null as any);
     }
 
-    populateDatabase(id: number): Observable<DatabaseMappingResult> {
+    populateDatabase(id: number): Observable<number> {
         let url_ = this.baseUrl + "/api/Databases/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
@@ -167,14 +167,14 @@ export class DatabasesClient implements IDatabasesClient {
                 try {
                     return this.processPopulateDatabase(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<DatabaseMappingResult>;
+                    return _observableThrow(e) as any as Observable<number>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<DatabaseMappingResult>;
+                return _observableThrow(response_) as any as Observable<number>;
         }));
     }
 
-    protected processPopulateDatabase(response: HttpResponseBase): Observable<DatabaseMappingResult> {
+    protected processPopulateDatabase(response: HttpResponseBase): Observable<number> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -185,7 +185,8 @@ export class DatabasesClient implements IDatabasesClient {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
             let result200: any = null;
             let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = DatabaseMappingResult.fromJS(resultData200);
+                result200 = resultData200 !== undefined ? resultData200 : <any>null;
+    
             return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
@@ -688,74 +689,6 @@ export enum DatabaseProvider {
     SQLServer = "SQLServer",
     MySQL = "MySQL",
     PostgreSQL = "PostgreSQL",
-}
-
-export class DatabaseMappingResult implements IDatabaseMappingResult {
-    success?: boolean;
-    databaseName?: string;
-    tablesTotal?: number;
-    tableNames?: string[];
-    errors?: string[];
-
-    constructor(data?: IDatabaseMappingResult) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.success = _data["success"];
-            this.databaseName = _data["databaseName"];
-            this.tablesTotal = _data["tablesTotal"];
-            if (Array.isArray(_data["tableNames"])) {
-                this.tableNames = [] as any;
-                for (let item of _data["tableNames"])
-                    this.tableNames!.push(item);
-            }
-            if (Array.isArray(_data["errors"])) {
-                this.errors = [] as any;
-                for (let item of _data["errors"])
-                    this.errors!.push(item);
-            }
-        }
-    }
-
-    static fromJS(data: any): DatabaseMappingResult {
-        data = typeof data === 'object' ? data : {};
-        let result = new DatabaseMappingResult();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["success"] = this.success;
-        data["databaseName"] = this.databaseName;
-        data["tablesTotal"] = this.tablesTotal;
-        if (Array.isArray(this.tableNames)) {
-            data["tableNames"] = [];
-            for (let item of this.tableNames)
-                data["tableNames"].push(item);
-        }
-        if (Array.isArray(this.errors)) {
-            data["errors"] = [];
-            for (let item of this.errors)
-                data["errors"].push(item);
-        }
-        return data;
-    }
-}
-
-export interface IDatabaseMappingResult {
-    success?: boolean;
-    databaseName?: string;
-    tablesTotal?: number;
-    tableNames?: string[];
-    errors?: string[];
 }
 
 export class UpdateDatabaseCommand implements IUpdateDatabaseCommand {

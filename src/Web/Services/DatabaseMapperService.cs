@@ -45,7 +45,8 @@ public class DatabaseMapperService : IDatabaseMapperService
                 {
                     Name = c.Name,
                     DatabaseTable = newTable,
-                    Type = c.DataType
+                    Type = c.DataType,
+                    DatabaseId = databaseId,
                 });
                 _context.DatabaseTableColumns.AddRange(newColumns);
 
@@ -54,6 +55,7 @@ public class DatabaseMapperService : IDatabaseMapperService
                     var newRow = new DatabaseTableRow()
                     {
                         DatabaseTable = newTable,
+                        DatabaseId = databaseId,
                     };
                     _context.DatabaseTableRows.Add(newRow);
 
@@ -74,6 +76,7 @@ public class DatabaseMapperService : IDatabaseMapperService
                             DatabaseTableColumn = c.Column,
                             Type = c.Column.Type,
                             Value = c.Cell.Value?.ToString(),
+                            DatabaseId = databaseId,
                         };
                         _context.DatabaseTableCells.Add(newCell);
                     }

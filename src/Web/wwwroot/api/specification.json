@@ -103,7 +103,8 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DatabaseMappingResult"
+                  "type": "integer",
+                  "format": "int32"
                 }
               }
             }
@@ -392,34 +393,6 @@
           "MySQL",
           "PostgreSQL"
         ]
-      },
-      "DatabaseMappingResult": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "databaseName": {
-            "type": "string"
-          },
-          "tablesTotal": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "tableNames": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "errors": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
       },
       "UpdateDatabaseCommand": {
         "type": "object",
