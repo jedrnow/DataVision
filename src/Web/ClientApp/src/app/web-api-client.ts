@@ -20,7 +20,7 @@ export interface IDatabasesClient {
     createDatabase(command: CreateDatabaseCommand): Observable<number>;
     populateDatabase(id: number): Observable<number>;
     updateDatabase(id: number, command: UpdateDatabaseCommand): Observable<void>;
-    deleteDatabase(id: number): Observable<void>;
+    deleteDatabase(id: number): Observable<number>;
 }
 
 @Injectable({
@@ -252,7 +252,7 @@ export class DatabasesClient implements IDatabasesClient {
         return _observableOf(null as any);
     }
 
-    deleteDatabase(id: number): Observable<void> {
+    deleteDatabase(id: number): Observable<number> {
         let url_ = this.baseUrl + "/api/Databases/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
@@ -263,6 +263,7 @@ export class DatabasesClient implements IDatabasesClient {
             observe: "response",
             responseType: "blob",
             headers: new HttpHeaders({
+                "Accept": "application/json"
             })
         };
 
@@ -273,23 +274,27 @@ export class DatabasesClient implements IDatabasesClient {
                 try {
                     return this.processDeleteDatabase(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<number>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<number>;
         }));
     }
 
-    protected processDeleteDatabase(response: HttpResponseBase): Observable<void> {
+    protected processDeleteDatabase(response: HttpResponseBase): Observable<number> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
             (response as any).error instanceof Blob ? (response as any).error : undefined;
 
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
-        if (status === 204) {
+        if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = resultData200 !== undefined ? resultData200 : <any>null;
+    
+            return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {

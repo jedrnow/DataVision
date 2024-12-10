@@ -53,13 +53,13 @@ public class Databases : EndpointGroupBase
         return TypedResults.NoContent();
     }
 
-    public async Task<NoContent> DeleteDatabase(ISender sender, int id)
+    public async Task<Ok<int>> DeleteDatabase(ISender sender, int id)
     {
         var command = new DeleteDatabaseCommand() { Id = id };
 
-        await sender.Send(command);
+        var result = await sender.Send(command);
 
-        return TypedResults.NoContent();
+        return TypedResults.Ok(result);
     }
 
     public async Task<Ok<int>> PopulateDatabase(ISender sender, int id)

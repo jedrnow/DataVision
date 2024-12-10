@@ -1,13 +1,15 @@
 ﻿using DataVision.Application.Common.Interfaces;
+using DataVision.Application.Common.Jobs;
+using DataVision.Domain.Entities;
 
 namespace DataVision.Application.Databases.Commands.DeleteDatabase;
 
-public record DeleteDatabaseCommand : IRequest
+public record DeleteDatabaseCommand : IRequest<int>
 {
     public int Id { get; init; }
 }
 
-public class DeleteDatabaseCommandHandler : IRequestHandler<DeleteDatabaseCommand>
+public class DeleteDatabaseCommandHandler : IRequestHandler<DeleteDatabaseCommand, int>
 {
     private readonly IApplicationDbContext _context;
 
@@ -16,27 +18,18 @@ public class DeleteDatabaseCommandHandler : IRequestHandler<DeleteDatabaseComman
         _context = context;
     }
 
-    public async Task Handle(DeleteDatabaseCommand request, CancellationToken cancellationToken)
+    public async Task<int> Handle(DeleteDatabaseCommand request, CancellationToken cancellationToken)
     {
-        var database = await _context.Databases.SingleOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
-
-        Guard.Against.NotFound(request.Id, database);
-
-        var tables = await _context.DatabaseTables
-            .Include(x => x.Columns)
-            .Include(x => x.Cells)
-            .Where(x => x.DatabaseId == database.Id)
-            .ToListAsync(cancellationToken);
-
-        var columns = tables.SelectMany(x => x.Columns);
-
-        var cells = tables.SelectMany(x => x.Cells);
-
-        _context.Databases.Remove(database);
-        _context.DatabaseTables.RemoveRange(tables);
-        _context.DatabaseTableColumns.RemoveRange(columns);
-        _context.DatabaseTableCells.RemoveRange(cells);
-
+        var job = new BackgroundJob();
+        _context.BackgroundJobs.Add(job);
         await _context.SaveChangesAsync(cancellationToken);
+
+        var externalJobId = Hangfire.BackgroundJob.Enqueue<ClearDatabaseJob>(x => x.Run(job.Id, request.Id, false, cancellationToken));
+
+        job.ExternalJobId = externalJobId;
+        _context.BackgroundJobs.Update(job);
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return job.Id;
     }
 }
