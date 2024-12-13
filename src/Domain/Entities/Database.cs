@@ -12,10 +12,11 @@ public class Database : BaseAuditableEntity
     public IList<DatabaseTableRow> DatabaseTableRows { get; private set; } = new List<DatabaseTableRow>();
     public IList<DatabaseTableCell> DatabaseTableCells { get; private set; } = new List<DatabaseTableCell>();
 
-    public void Update(string? name, string? connectionString, string? userId = null)
+    public void Update(string? name, string? connectionString, DatabaseProvider databaseProvider, string? userId = null)
     {
         Name = name;
         ConnectionString = connectionString;
+        Provider = databaseProvider;
 
         Update(userId);
     }

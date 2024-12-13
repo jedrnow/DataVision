@@ -1,8 +1,10 @@
-<h1 id="tableLabel">Databases</h1>
+<h1 id="tableLabel"><a routerLink="/databases" style="text-decoration: none;">Databases</a></h1>
 
 <div>
-  <button class="btn btn-primary" routerLink="/add-database">Add New Database</button>
+  <button class="btn btn-primary" routerLink="/databases/add">Add New Database</button>
 </div>
+
+<br>
 
 <table class="table table-striped" aria-labelledby="tableLabel">
   <thead>
@@ -17,7 +19,7 @@
   </thead>
   <tbody>
     <tr *ngFor="let db of databases; let i = index;">
-      <td>{{ db.name }}</td>
+      <td><a [routerLink]="['/databases', db.id]">{{ db.name }}</a></td>
       <td>{{ db.provider }}</td>
       <td>
         <button 
@@ -28,30 +30,53 @@
       </td>
       <td>
         <!-- Sync button -->
-        <button 
+        <div class="buttonDiv">
+          <button 
+          *ngIf="!(isSyncing(db) | async)"
           class="btn btn-primary" 
-          [disabled]="db.isPopulated || disableAll" 
+          [disabled]="db.isPopulated" 
           (click)="syncDatabase(db)">
           <ng-icon name="bootstrapCloudArrowDownFill"></ng-icon> Sync
         </button>
+        <div *ngIf="(isSyncing(db) | async)" class="loading-spinner">
+          <div class="spinner-border" role="status">
+            <span class="sr-only"></span>
+          </div>
+        </div>
+        </div>
       </td>
       <td>
         <!-- Clear button -->
-        <button 
-          class="btn btn-warning" 
-          [disabled]="!db.isPopulated || disableAll" 
-          (click)="clearDatabase(db)">
-          <ng-icon name="matCleaningServicesOutline"></ng-icon> Clear
-        </button>
+         <div class="buttonDiv">
+            <button 
+            *ngIf="!(isSyncing(db) | async)"
+            class="btn btn-warning" 
+            [disabled]="!db.isPopulated" 
+            (click)="clearDatabase(db)">
+            <ng-icon name="matCleaningServicesOutline"></ng-icon> Clear
+          </button>
+          <div *ngIf="(isSyncing(db) | async)" class="loading-spinner">
+            <div class="spinner-border" role="status">
+              <span class="sr-only"></span>
+            </div>
+          </div>
+         </div>
       </td>
       <td>
         <!-- Clear button -->
-        <button 
+        <div class="buttonDiv">
+          <button 
+          *ngIf="!(isSyncing(db) | async)"
           class="btn btn-danger" 
-          [disabled]="disableAll" 
           (click)="deleteDatabase(db)">
           <ng-icon name="matDeleteOutline"></ng-icon> Delete
         </button>
+        <div *ngIf="(isSyncing(db) | async)" class="loading-spinner">
+          <div class="spinner-border" role="status">
+            <span class="sr-only"></span>
+          </div>
+        </div>
+        </div>
       </td>
     </tr>
   </tbody>

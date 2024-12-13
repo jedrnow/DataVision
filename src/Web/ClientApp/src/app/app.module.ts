@@ -16,6 +16,9 @@ import { NgIcon } from '@ng-icons/core';
 import { PaginationComponent } from './common/pagination/pagination.component';
 import { AddDatabaseComponent } from './databases/add-database/add-database.component';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { DatabaseDetailsComponent } from './databases/database-details/database-details.component';
+import { CommonModule } from '@angular/common';
+import { EditDatabaseComponent } from './databases/edit-database/edit-database.component';
 
 @NgModule({
     declarations: [
@@ -24,17 +27,22 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
         HomeComponent,
         DatabasesComponent,
         PaginationComponent,
-        AddDatabaseComponent
+        AddDatabaseComponent,
+        DatabaseDetailsComponent,
+        EditDatabaseComponent
     ],
     bootstrap: [AppComponent],
     imports: [
         NgIcon,
+        CommonModule,
         BrowserModule,
         FormsModule,
         RouterModule.forRoot([
             { path: '', component: HomeComponent, pathMatch: 'full' },
-            { path: 'add-database', component: AddDatabaseComponent },
-            { path: 'databases', component: DatabasesComponent }
+            { path: 'databases/add', component: AddDatabaseComponent },
+            { path: 'databases', component: DatabasesComponent },
+            { path: 'databases/:id', component: DatabaseDetailsComponent },
+            { path: 'databases/:id/edit', component: EditDatabaseComponent },
         ]),
         BrowserAnimationsModule,
         ReactiveFormsModule,

@@ -20,10 +20,19 @@ public class ExistenceService : IExistenceService
 
     public async Task<bool> DatabaseTableExistsAsync(int databaseTableId, CancellationToken cancellationToken = default)
     {
-        var database = await _context.DatabaseTables
+        var databaseTable = await _context.DatabaseTables
             .AsNoTracking()
             .SingleOrDefaultAsync(x => x.Id == databaseTableId, cancellationToken);
 
-        return database != null;
+        return databaseTable != null;
+    }
+
+    public async Task<bool> BackgroundJobExistsAsync(int backgroundJobId, CancellationToken cancellationToken = default)
+    {
+        var backgroundJob = await _context.BackgroundJobs
+            .AsNoTracking()
+            .SingleOrDefaultAsync(x => x.Id == backgroundJobId, cancellationToken);
+
+        return backgroundJob != null;
     }
 }

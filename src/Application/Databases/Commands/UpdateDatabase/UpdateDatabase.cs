@@ -1,4 +1,5 @@
 ﻿using DataVision.Application.Common.Interfaces;
+using DataVision.Domain.Enums;
 
 namespace DataVision.Application.Databases.Commands.UpdateDatabase;
 
@@ -7,6 +8,7 @@ public record UpdateDatabaseCommand : IRequest
     public int Id { get; init; }
     public string? Name { get; init; }
     public string? ConnectionString { get; init; }
+    public DatabaseProvider DatabaseProvider { get; init; }
 }
 
 public class UpdateDatabaseCommandHandler : IRequestHandler<UpdateDatabaseCommand>
@@ -24,7 +26,7 @@ public class UpdateDatabaseCommandHandler : IRequestHandler<UpdateDatabaseComman
 
         Guard.Against.NotFound(request.Id, database);
 
-        database.Update(request.Name, request.ConnectionString);
+        database.Update(request.Name, request.ConnectionString, request.DatabaseProvider);
 
         await _context.SaveChangesAsync(cancellationToken);
     }

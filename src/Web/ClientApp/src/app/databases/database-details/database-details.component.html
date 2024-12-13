@@ -1,0 +1,20 @@
+<h1 id="tableLabel"><a routerLink="/databases" style="text-decoration: none;">Databases</a></h1>
+
+<div id="container">
+    <div *ngIf="database">
+        <h2>Database Details</h2>
+        <button class="btn btn-primary" [routerLink]="['/databases', database.id, 'edit']">Edit Database</button>
+    </div>
+
+    <br>
+
+    <div *ngIf="database">
+        <p><strong>Name:</strong> {{ database.name }}</p>
+        <p><strong>Provider:</strong> {{ database.provider }}</p>
+        <p><strong>Connection String:</strong> {{ database.connectionString }}</p>
+        <p><strong>Populated:</strong> {{ database.isPopulated ? 'Yes' : 'No' }}</p>
+        <p><strong>Tables:</strong> {{ database.tablesCount }}</p>
+        <p><strong>Rows:</strong> {{ database.rowsCount }}</p>
+        <p><strong>Cells:</strong> {{ database.cellsCount }}</p>
+    </div>
+</div>

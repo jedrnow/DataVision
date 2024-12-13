@@ -6,6 +6,38 @@
     "version": "1.0.0"
   },
   "paths": {
+    "/api/BackgroundJobs": {
+      "get": {
+        "tags": [
+          "BackgroundJobs"
+        ],
+        "operationId": "GetBackgroundJobDetails",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackgroundJobDetailsDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Databases": {
       "get": {
         "tags": [
@@ -66,6 +98,107 @@
         },
         "responses": {
           "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Databases/{id}": {
+      "get": {
+        "tags": [
+          "Databases"
+        ],
+        "operationId": "GetDatabaseDetails",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatabaseDetailsDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Databases"
+        ],
+        "operationId": "UpdateDatabase",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "command",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDatabaseCommand"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "400": {
+            "description": ""
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Databases"
+        ],
+        "operationId": "DeleteDatabase",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
             "description": "",
             "content": {
               "application/json": {
@@ -158,77 +291,6 @@
           "Databases"
         ],
         "operationId": "ClearDatabase",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "x-position": 1
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "integer",
-                  "format": "int32"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/Databases/{id}": {
-      "put": {
-        "tags": [
-          "Databases"
-        ],
-        "operationId": "UpdateDatabase",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "x-position": 1
-          }
-        ],
-        "requestBody": {
-          "x-name": "command",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateDatabaseCommand"
-              }
-            }
-          },
-          "required": true,
-          "x-position": 2
-        },
-        "responses": {
-          "204": {
-            "description": ""
-          },
-          "400": {
-            "description": ""
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "Databases"
-        ],
-        "operationId": "DeleteDatabase",
         "parameters": [
           {
             "name": "id",
@@ -398,6 +460,34 @@
   },
   "components": {
     "schemas": {
+      "BackgroundJobDetailsDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "externalJobId": {
+            "type": "string",
+            "nullable": true
+          },
+          "isCompleted": {
+            "type": "boolean"
+          },
+          "isSucceeded": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "result": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
       "PaginatedListOfDatabaseDto": {
         "type": "object",
         "additionalProperties": false,
@@ -462,6 +552,42 @@
           "PostgreSQL"
         ]
       },
+      "DatabaseDetailsDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "provider": {
+            "$ref": "#/components/schemas/DatabaseProvider"
+          },
+          "isPopulated": {
+            "type": "boolean"
+          },
+          "connectionString": {
+            "type": "string",
+            "nullable": true
+          },
+          "tablesCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rowsCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cellsCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "CreateDatabaseCommand": {
         "type": "object",
         "additionalProperties": false,
@@ -494,6 +620,9 @@
           "connectionString": {
             "type": "string",
             "nullable": true
+          },
+          "databaseProvider": {
+            "$ref": "#/components/schemas/DatabaseProvider"
           }
         }
       },

@@ -1,18 +1,18 @@
 <h1 id="tableLabel"><a routerLink="/databases" style="text-decoration: none;">Databases</a></h1>
 
 <div class="container">
-    <h2>Add New Database</h2>
+    <h2>Edit Database</h2>
   
-    <form [formGroup]="addDatabaseForm" (ngSubmit)="createDatabase()">
+    <form [formGroup]="editDatabaseForm" (ngSubmit)="updateDatabase()">
       <div class="form-group">
         <label for="name">Database Name</label>
         <input
           id="name"
           formControlName="name"
           class="form-control"
-          [ngClass]="{ 'is-invalid': addDatabaseForm.get('name')?.invalid && addDatabaseForm.get('name')?.touched }"
+          [ngClass]="{ 'is-invalid': editDatabaseForm.get('name')?.invalid && editDatabaseForm.get('name')?.touched }"
         />
-        <div *ngIf="addDatabaseForm.get('name')?.invalid && addDatabaseForm.get('name')?.touched" class="invalid-feedback">
+        <div *ngIf="editDatabaseForm.get('name')?.invalid && editDatabaseForm.get('name')?.touched" class="invalid-feedback">
           Name is required.
         </div>
       </div>
@@ -23,9 +23,9 @@
           id="connectionString"
           formControlName="connectionString"
           class="form-control"
-          [ngClass]="{ 'is-invalid': addDatabaseForm.get('connectionString')?.invalid && addDatabaseForm.get('connectionString')?.touched }"
+          [ngClass]="{ 'is-invalid': editDatabaseForm.get('connectionString')?.invalid && editDatabaseForm.get('connectionString')?.touched }"
         />
-        <div *ngIf="addDatabaseForm.get('connectionString')?.invalid && addDatabaseForm.get('connectionString')?.touched" class="invalid-feedback">
+        <div *ngIf="editDatabaseForm.get('connectionString')?.invalid && editDatabaseForm.get('connectionString')?.touched" class="invalid-feedback">
           Connection string is required.
         </div>
       </div>
@@ -35,17 +35,17 @@
         <select id="provider" formControlName="provider" class="form-control">
           <option *ngFor="let provider of availableProviders" [value]="provider">{{ provider }}</option>
         </select>
-        <div *ngIf="addDatabaseForm.get('provider')?.invalid && addDatabaseForm.get('provider')?.touched" class="invalid-feedback">
+        <div *ngIf="editDatabaseForm.get('provider')?.invalid && editDatabaseForm.get('provider')?.touched" class="invalid-feedback">
           Database provider is required.
         </div>
       </div>
   
       <div class="form-group">
-        <button type="button" class="btn btn-info" (click)="testConnection()" [disabled]="isSubmitting || !addDatabaseForm.get('connectionString')?.value">
+        <button type="button" class="btn btn-info" (click)="testConnection()" [disabled]="isSubmitting || !editDatabaseForm.get('connectionString')?.value">
           Test Connection
         </button>
         <button type="submit" class="btn btn-success" [disabled]="isSubmitDisabled">
-          Create Database
+          Save Changes
         </button>
       </div>
     </form>
