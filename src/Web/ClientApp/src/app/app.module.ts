@@ -1,6 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { APP_ID, NgModule } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
@@ -12,24 +12,35 @@ import { HomeComponent } from './home/home.component';
 import { AuthorizeInterceptor } from 'src/api-authorization/authorize.interceptor';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { DatabasesComponent } from './databases/databases.component';
+import { NgIcon } from '@ng-icons/core';
+import { PaginationComponent } from './common/pagination/pagination.component';
+import { AddDatabaseComponent } from './databases/add-database/add-database.component';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 @NgModule({
     declarations: [
         AppComponent,
         NavMenuComponent,
         HomeComponent,
-        DatabasesComponent
+        DatabasesComponent,
+        PaginationComponent,
+        AddDatabaseComponent
     ],
     bootstrap: [AppComponent],
     imports: [
+        NgIcon,
         BrowserModule,
         FormsModule,
         RouterModule.forRoot([
             { path: '', component: HomeComponent, pathMatch: 'full' },
+            { path: 'add-database', component: AddDatabaseComponent },
             { path: 'databases', component: DatabasesComponent }
         ]),
         BrowserAnimationsModule,
-        ModalModule.forRoot()],
+        ReactiveFormsModule,
+        MatSnackBarModule,
+        ModalModule.forRoot()
+    ],
     providers: [
         { provide: APP_ID, useValue: 'ng-cli-universal' },
         { provide: HTTP_INTERCEPTORS, useClass: AuthorizeInterceptor, multi: true },

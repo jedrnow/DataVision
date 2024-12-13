@@ -1,0 +1,11 @@
+/* Optional styling adjustments for pagination */
+.pagination {
+    justify-content: center; /* Center pagination */
+  }
+  
+  .page-item.active .page-link {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: white;
+  }
+  

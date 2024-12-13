@@ -18,7 +18,9 @@ export const API_BASE_URL = new InjectionToken<string>('API_BASE_URL');
 export interface IDatabasesClient {
     getDatabases(pageNumber: number, pageSize: number): Observable<PaginatedListOfDatabaseDto>;
     createDatabase(command: CreateDatabaseCommand): Observable<number>;
+    testConnection(databaseProvider: DatabaseProvider, connectionString: string): Observable<boolean>;
     populateDatabase(id: number): Observable<number>;
+    clearDatabase(id: number): Observable<number>;
     updateDatabase(id: number, command: UpdateDatabaseCommand): Observable<void>;
     deleteDatabase(id: number): Observable<number>;
 }
@@ -145,8 +147,65 @@ export class DatabasesClient implements IDatabasesClient {
         return _observableOf(null as any);
     }
 
+    testConnection(databaseProvider: DatabaseProvider, connectionString: string): Observable<boolean> {
+        let url_ = this.baseUrl + "/api/Databases/TestConnection?";
+        if (databaseProvider === undefined || databaseProvider === null)
+            throw new Error("The parameter 'databaseProvider' must be defined and cannot be null.");
+        else
+            url_ += "databaseProvider=" + encodeURIComponent("" + databaseProvider) + "&";
+        if (connectionString === undefined || connectionString === null)
+            throw new Error("The parameter 'connectionString' must be defined and cannot be null.");
+        else
+            url_ += "connectionString=" + encodeURIComponent("" + connectionString) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processTestConnection(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processTestConnection(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<boolean>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<boolean>;
+        }));
+    }
+
+    protected processTestConnection(response: HttpResponseBase): Observable<boolean> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = resultData200 !== undefined ? resultData200 : <any>null;
+    
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
     populateDatabase(id: number): Observable<number> {
-        let url_ = this.baseUrl + "/api/Databases/{id}";
+        let url_ = this.baseUrl + "/api/Databases/{id}/Populate";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
         url_ = url_.replace("{id}", encodeURIComponent("" + id));
@@ -175,6 +234,58 @@ export class DatabasesClient implements IDatabasesClient {
     }
 
     protected processPopulateDatabase(response: HttpResponseBase): Observable<number> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = resultData200 !== undefined ? resultData200 : <any>null;
+    
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    clearDatabase(id: number): Observable<number> {
+        let url_ = this.baseUrl + "/api/Databases/{id}/Clear";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processClearDatabase(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processClearDatabase(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<number>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<number>;
+        }));
+    }
+
+    protected processClearDatabase(response: HttpResponseBase): Observable<number> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -605,7 +716,8 @@ export interface IPaginatedListOfDatabaseDto {
 export class DatabaseDto implements IDatabaseDto {
     id?: number;
     name?: string | undefined;
-    connectionString?: string | undefined;
+    provider?: DatabaseProvider;
+    isPopulated?: boolean;
 
     constructor(data?: IDatabaseDto) {
         if (data) {
@@ -620,7 +732,8 @@ export class DatabaseDto implements IDatabaseDto {
         if (_data) {
             this.id = _data["id"];
             this.name = _data["name"];
-            this.connectionString = _data["connectionString"];
+            this.provider = _data["provider"];
+            this.isPopulated = _data["isPopulated"];
         }
     }
 
@@ -635,7 +748,8 @@ export class DatabaseDto implements IDatabaseDto {
         data = typeof data === 'object' ? data : {};
         data["id"] = this.id;
         data["name"] = this.name;
-        data["connectionString"] = this.connectionString;
+        data["provider"] = this.provider;
+        data["isPopulated"] = this.isPopulated;
         return data;
     }
 }
@@ -643,7 +757,14 @@ export class DatabaseDto implements IDatabaseDto {
 export interface IDatabaseDto {
     id?: number;
     name?: string | undefined;
-    connectionString?: string | undefined;
+    provider?: DatabaseProvider;
+    isPopulated?: boolean;
+}
+
+export enum DatabaseProvider {
+    SQLServer = "SQLServer",
+    MySQL = "MySQL",
+    PostgreSQL = "PostgreSQL",
 }
 
 export class CreateDatabaseCommand implements ICreateDatabaseCommand {
@@ -688,12 +809,6 @@ export interface ICreateDatabaseCommand {
     name?: string | undefined;
     connectionString?: string | undefined;
     databaseProvider?: DatabaseProvider;
-}
-
-export enum DatabaseProvider {
-    SQLServer = "SQLServer",
-    MySQL = "MySQL",
-    PostgreSQL = "PostgreSQL",
 }
 
 export class UpdateDatabaseCommand implements IUpdateDatabaseCommand {

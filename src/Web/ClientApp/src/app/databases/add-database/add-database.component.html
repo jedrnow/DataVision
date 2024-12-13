@@ -1,0 +1,51 @@
+<div class="container">
+    <h2>Add New Database</h2>
+  
+    <form [formGroup]="addDatabaseForm" (ngSubmit)="createDatabase()">
+      <div class="form-group">
+        <label for="name">Database Name</label>
+        <input
+          id="name"
+          formControlName="name"
+          class="form-control"
+          [ngClass]="{ 'is-invalid': addDatabaseForm.get('name')?.invalid && addDatabaseForm.get('name')?.touched }"
+        />
+        <div *ngIf="addDatabaseForm.get('name')?.invalid && addDatabaseForm.get('name')?.touched" class="invalid-feedback">
+          Name is required.
+        </div>
+      </div>
+  
+      <div class="form-group">
+        <label for="connectionString">Connection String</label>
+        <input
+          id="connectionString"
+          formControlName="connectionString"
+          class="form-control"
+          [ngClass]="{ 'is-invalid': addDatabaseForm.get('connectionString')?.invalid && addDatabaseForm.get('connectionString')?.touched }"
+        />
+        <div *ngIf="addDatabaseForm.get('connectionString')?.invalid && addDatabaseForm.get('connectionString')?.touched" class="invalid-feedback">
+          Connection string is required.
+        </div>
+      </div>
+  
+      <div class="form-group">
+        <label for="provider">Database Provider</label>
+        <select id="provider" formControlName="provider" class="form-control">
+          <option *ngFor="let provider of availableProviders" [value]="provider">{{ provider }}</option>
+        </select>
+        <div *ngIf="addDatabaseForm.get('provider')?.invalid && addDatabaseForm.get('provider')?.touched" class="invalid-feedback">
+          Database provider is required.
+        </div>
+      </div>
+  
+      <div class="form-group">
+        <button type="button" class="btn btn-info" (click)="testConnection()" [disabled]="isSubmitting || !addDatabaseForm.get('connectionString')?.value">
+          Test Connection
+        </button>
+        <button type="submit" class="btn btn-success" [disabled]="isSubmitDisabled">
+          Create Database
+        </button>
+      </div>
+    </form>
+  </div>
+  

@@ -1,9 +1,12 @@
 ﻿using DataVision.Application.Common.Models;
+using DataVision.Application.Databases.Commands.ClearDatabase;
 using DataVision.Application.Databases.Commands.CreateDatabase;
 using DataVision.Application.Databases.Commands.DeleteDatabase;
 using DataVision.Application.Databases.Commands.PopulateDatabase;
 using DataVision.Application.Databases.Commands.UpdateDatabase;
 using DataVision.Application.Databases.Queries.GetDatabases;
+using DataVision.Application.Databases.Queries.TestConnection;
+using DataVision.Domain.Enums;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace DataVision.Web.Endpoints;
@@ -15,8 +18,10 @@ public class Databases : EndpointGroupBase
         app.MapGroup(this)
             .RequireAuthorization()
             .MapGet(GetDatabases)
+            .MapGet(TestConnection, "TestConnection")
             .MapPost(CreateDatabase)
             .MapPost(PopulateDatabase, "{id}/Populate")
+            .MapPost(ClearDatabase, "{id}/Clear")
             .MapPut(UpdateDatabase, "{id}")
             .MapDelete(DeleteDatabase, "{id}");
     }
@@ -30,6 +35,19 @@ public class Databases : EndpointGroupBase
                 PageNumber = pageNumber,
                 PageSize = pageSize
             }
+        };
+
+        var result = await sender.Send(query);
+
+        return TypedResults.Ok(result);
+    }
+
+    public async Task<Ok<bool>> TestConnection(ISender sender, DatabaseProvider databaseProvider, string connectionString)
+    {
+        var query = new TestConnectionQuery()
+        {
+            DatabaseProvider = databaseProvider,
+            ConnectionString = connectionString
         };
 
         var result = await sender.Send(query);
@@ -56,6 +74,14 @@ public class Databases : EndpointGroupBase
     public async Task<Ok<int>> DeleteDatabase(ISender sender, int id)
     {
         var command = new DeleteDatabaseCommand() { Id = id };
+
+        var result = await sender.Send(command);
+
+        return TypedResults.Ok(result);
+    }
+    public async Task<Ok<int>> ClearDatabase(ISender sender, int id)
+    {
+        var command = new ClearDatabaseCommand() { Id = id };
 
         var result = await sender.Send(command);
 

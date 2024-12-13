@@ -19,6 +19,62 @@ code {
   border-color: #1861ac;
 }
 
+.cdk-overlay-container {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none; /* Prevent interaction with the overlay container */
+  z-index: 10000; /* Ensure the overlay is above other content */
+}
+
+.cdk-global-overlay-wrapper {
+  display: block !important; /* Override flex layout */
+}
+
+/* Target the mat-snack-bar-container within cdk-overlay-container */
+.mat-snack-bar-container {
+  position: absolute !important; /* Absolute positioning within the overlay container */
+  top: 20px !important; /* Move the snackbar 20px from the top */
+  right: 20px !important; /* Move the snackbar 20px from the right */
+  z-index: 10001; /* Ensure the snack bar appears above the overlay container */
+  min-width: 250px; /* Minimum width of the snack bar */
+  max-width: 400px; /* Maximum width of the snack bar */
+  border-radius: 5px;
+  padding: 10px 20px;
+  font-size: 14px;
+}
+
+/* Success Snack */
+.success-snack {
+  background-color: #4caf50; /* Green */
+  color: white;
+  max-width: fit-content;
+  padding: 0px;
+  font-size: 14px;
+  justify-content: center;
+}
+
+/* Error Snack */
+.error-snack {
+  background-color: #f44336; /* Red */
+  color: white;
+  max-width: fit-content;
+  padding: 0px;
+  font-size: 14px;
+}
+
+/* Info Snack */
+.info-snack {
+  background-color: #2196f3; /* Blue */
+  color: white;
+  max-width: fit-content;
+  padding: 0px;
+  font-size: 14px;
+}
+
+
 /* Importing Bootstrap SCSS file. */
 @import "node_modules/bootstrap/scss/bootstrap";
 

@@ -34,6 +34,8 @@ public class ClearDatabaseJob
             .Where(x => x.DatabaseId == database.Id)
             .ExecuteDeleteAsync(cancellationToken);
 
+        database.IsPopulated = false;
+
         if (deleteAfterwards)
         {
             _context.Databases.Remove(database);

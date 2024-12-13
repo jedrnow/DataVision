@@ -79,7 +79,47 @@
         }
       }
     },
-    "/api/Databases/{id}": {
+    "/api/Databases/TestConnection": {
+      "get": {
+        "tags": [
+          "Databases"
+        ],
+        "operationId": "TestConnection",
+        "parameters": [
+          {
+            "name": "databaseProvider",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/DatabaseProvider"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "connectionString",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 2
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Databases/{id}/Populate": {
       "post": {
         "tags": [
           "Databases"
@@ -110,7 +150,42 @@
             }
           }
         }
-      },
+      }
+    },
+    "/api/Databases/{id}/Clear": {
+      "post": {
+        "tags": [
+          "Databases"
+        ],
+        "operationId": "ClearDatabase",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Databases/{id}": {
       "put": {
         "tags": [
           "Databases"
@@ -365,11 +440,27 @@
             "type": "string",
             "nullable": true
           },
-          "connectionString": {
-            "type": "string",
-            "nullable": true
+          "provider": {
+            "$ref": "#/components/schemas/DatabaseProvider"
+          },
+          "isPopulated": {
+            "type": "boolean"
           }
         }
+      },
+      "DatabaseProvider": {
+        "type": "string",
+        "description": "",
+        "x-enumNames": [
+          "SQLServer",
+          "MySQL",
+          "PostgreSQL"
+        ],
+        "enum": [
+          "SQLServer",
+          "MySQL",
+          "PostgreSQL"
+        ]
       },
       "CreateDatabaseCommand": {
         "type": "object",
@@ -387,20 +478,6 @@
             "$ref": "#/components/schemas/DatabaseProvider"
           }
         }
-      },
-      "DatabaseProvider": {
-        "type": "string",
-        "description": "",
-        "x-enumNames": [
-          "SQLServer",
-          "MySQL",
-          "PostgreSQL"
-        ],
-        "enum": [
-          "SQLServer",
-          "MySQL",
-          "PostgreSQL"
-        ]
       },
       "UpdateDatabaseCommand": {
         "type": "object",

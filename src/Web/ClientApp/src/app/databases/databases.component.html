@@ -1,18 +1,67 @@
 <h1 id="tableLabel">Databases</h1>
 
-<table class='table table-striped' aria-labelledby="tableLabel">
+<div>
+  <button class="btn btn-primary" routerLink="/add-database">Add New Database</button>
+</div>
+
+<table class="table table-striped" aria-labelledby="tableLabel">
   <thead>
     <tr>
       <th>Name</th>
-      <th>Connection string</th>
+      <th>Provider</th>
+      <th>Populated</th>
+      <th></th>
+      <th></th>
+      <th></th>
     </tr>
   </thead>
   <tbody>
-    @for (db of databases; track $index) {
-    <tr>
-      <td>{{ db.name | date }}</td>
-      <td>{{ db.connectionString }}</td>
+    <tr *ngFor="let db of databases; let i = index;">
+      <td>{{ db.name }}</td>
+      <td>{{ db.provider }}</td>
+      <td>
+        <button 
+          class="btn btn-info" 
+          [disabled]="true">
+          <ng-icon [name]="db.isPopulated ? 'bootstrapCheck' : 'bootstrapX'"></ng-icon>
+        </button>
+      </td>
+      <td>
+        <!-- Sync button -->
+        <button 
+          class="btn btn-primary" 
+          [disabled]="db.isPopulated || disableAll" 
+          (click)="syncDatabase(db)">
+          <ng-icon name="bootstrapCloudArrowDownFill"></ng-icon> Sync
+        </button>
+      </td>
+      <td>
+        <!-- Clear button -->
+        <button 
+          class="btn btn-warning" 
+          [disabled]="!db.isPopulated || disableAll" 
+          (click)="clearDatabase(db)">
+          <ng-icon name="matCleaningServicesOutline"></ng-icon> Clear
+        </button>
+      </td>
+      <td>
+        <!-- Clear button -->
+        <button 
+          class="btn btn-danger" 
+          [disabled]="disableAll" 
+          (click)="deleteDatabase(db)">
+          <ng-icon name="matDeleteOutline"></ng-icon> Delete
+        </button>
+      </td>
     </tr>
-    }
   </tbody>
 </table>
+
+<app-pagination 
+  [pageNumber]="pageNumber" 
+  [totalPages]="totalPages"
+  [pageSize]="pageSize"
+  [pageSizeOptions]="[5, 10, 20, 50]" 
+  (pageChange)="changePage($event)" 
+  (pageSizeChange)="changePageSize($event)">
+</app-pagination>
