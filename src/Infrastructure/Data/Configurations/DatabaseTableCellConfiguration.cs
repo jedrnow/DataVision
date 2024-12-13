@@ -9,5 +9,9 @@ public class DatabaseTableCellConfiguration : IEntityTypeConfiguration<DatabaseT
     {
         builder.Property(c => c.Type)
             .IsRequired();
+
+        builder.HasOne(c => c.DatabaseTableColumn)
+            .WithMany()
+            .HasForeignKey(c => c.DatabaseTableColumnId);
     }
 }

@@ -13,7 +13,7 @@ export class DatabaseDetailsComponent implements OnInit {
   constructor(private route: ActivatedRoute, private client: DatabasesClient) {}
 
   ngOnInit(): void {
-    const dbId = this.route.snapshot.paramMap.get('id');
+    const dbId = this.route.snapshot.paramMap.get('databaseId');
     if (dbId) {
       this.client.getDatabaseDetails(+dbId)
       .subscribe({

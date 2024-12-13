@@ -12,10 +12,5 @@ public class DatabaseTableColumnConfiguration : IEntityTypeConfiguration<Databas
 
         builder.Property(t => t.Type)
             .IsRequired();
-
-        builder.HasMany(t => t.Cells)
-            .WithOne(c => c.DatabaseTableColumn)
-            .HasForeignKey(c =>  c.DatabaseTableColumnId)
-            .OnDelete(DeleteBehavior.ClientCascade);
     }
 }

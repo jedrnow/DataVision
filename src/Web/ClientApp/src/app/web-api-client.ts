@@ -1278,6 +1278,7 @@ export class DatabaseTableCellDto implements IDatabaseTableCellDto {
     id?: number;
     type?: DataType2;
     value?: string | undefined;
+    databaseTableColumnId?: number;
 
     constructor(data?: IDatabaseTableCellDto) {
         if (data) {
@@ -1293,6 +1294,7 @@ export class DatabaseTableCellDto implements IDatabaseTableCellDto {
             this.id = _data["id"];
             this.type = _data["type"];
             this.value = _data["value"];
+            this.databaseTableColumnId = _data["databaseTableColumnId"];
         }
     }
 
@@ -1308,6 +1310,7 @@ export class DatabaseTableCellDto implements IDatabaseTableCellDto {
         data["id"] = this.id;
         data["type"] = this.type;
         data["value"] = this.value;
+        data["databaseTableColumnId"] = this.databaseTableColumnId;
         return data;
     }
 }
@@ -1316,6 +1319,7 @@ export interface IDatabaseTableCellDto {
     id?: number;
     type?: DataType2;
     value?: string | undefined;
+    databaseTableColumnId?: number;
 }
 
 export enum DataType2 {

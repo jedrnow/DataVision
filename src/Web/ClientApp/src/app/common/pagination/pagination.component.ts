@@ -25,7 +25,21 @@ export class PaginationComponent {
     this.changePage(1);
   }
 
+
   get pages(): number[] {
-    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+    const pageLimit = 5;
+    const halfLimit = Math.floor(pageLimit / 2);
+
+    let startPage = Math.max(1, this.pageNumber - halfLimit);
+    let endPage = Math.min(this.totalPages, this.pageNumber + halfLimit);
+
+    if (this.pageNumber - startPage < halfLimit) {
+      startPage = Math.max(1, endPage - pageLimit + 1);
+    }
+    if (endPage - this.pageNumber < halfLimit) {
+      endPage = Math.min(this.totalPages, startPage + pageLimit - 1);
+    }
+
+    return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
   }
 }

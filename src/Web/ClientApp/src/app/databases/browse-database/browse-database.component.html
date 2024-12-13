@@ -1,0 +1,49 @@
+<div class="container">
+    <h2>Browse Database</h2>
+  
+    <!-- Zakładki -->
+    <ul class="nav nav-tabs">
+      <li *ngFor="let table of tables" class="nav-item">
+        <a
+          class="nav-link"
+          [class.active]="selectedTable?.id === table.id"
+          (click)="selectTable(table)"
+        >
+          {{ table.name }}
+        </a>
+      </li>
+    </ul>
+  
+    <!-- Dane aktywnej zakładki -->
+    <div *ngIf="selectedTable" class="table-content mt-4">
+      <h3>{{ selectedTable.name }}</h3>
+  
+      <!-- Kontener z przewijaniem poziomym -->
+      <div class="table-responsive">
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th *ngFor="let column of columns">{{ column.name }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of rows">
+              <td *ngFor="let column of columns">
+                {{ getCellValue(row, column.id) }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+  
+      <!-- Paginacja -->
+      <app-pagination
+        [pageNumber]="pageNumber"
+        [totalPages]="totalPages"
+        [pageSize]="pageSize"
+        (pageChange)="changePage($event)"
+      >
+      </app-pagination>
+    </div>
+  </div>
+  

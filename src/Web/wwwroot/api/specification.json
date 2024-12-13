@@ -739,6 +739,10 @@
           "value": {
             "type": "string",
             "nullable": true
+          },
+          "databaseTableColumnId": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },

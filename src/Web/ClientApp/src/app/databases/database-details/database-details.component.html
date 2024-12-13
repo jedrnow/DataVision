@@ -4,6 +4,7 @@
     <div *ngIf="database">
         <h2>Database Details</h2>
         <button class="btn btn-primary" [routerLink]="['/databases', database.id, 'edit']">Edit Database</button>
+        <button class="btn btn-primary" [routerLink]="['/databases', database.id, 'tables']">Browse Database</button>
     </div>
 
     <br>

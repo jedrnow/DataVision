@@ -1,0 +1,42 @@
+.nav-tabs .nav-link {
+    cursor: pointer;
+  }
+  
+  .nav-tabs .nav-link.active {
+    font-weight: bold;
+    background-color: #007bff;
+    color: white;
+  }
+
+.table {
+    width: 100%;
+    table-layout: fixed;
+  }
+  
+  .table th, .table td {
+    text-align: left;
+    vertical-align: middle; 
+    padding: 10px;
+    word-wrap: break-word;
+  }
+  
+  .table th {
+    background-color: #f8f9fa; 
+    font-weight: bold; 
+  }
+  
+  .table td {
+    background-color: #ffffff; 
+  }
+  
+  .table td, .table th {
+    min-width: 150px; 
+  }
+  
+
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  

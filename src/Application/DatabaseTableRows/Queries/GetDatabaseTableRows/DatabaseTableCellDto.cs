@@ -7,6 +7,7 @@ public class DatabaseTableCellDto
     public int Id { get; init; }
     public DataType Type { get; init; }
     public string? Value { get; init; }
+    public int DatabaseTableColumnId { get; init; }
 
     private class Mapping : Profile
     {

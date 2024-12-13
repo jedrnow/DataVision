@@ -25,7 +25,7 @@ export class EditDatabaseComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.databaseId = this.route.snapshot.paramMap.get('id');
+    this.databaseId = this.route.snapshot.paramMap.get('databaseId');
 
     if (this.databaseId) {
       this.client.getDatabaseDetails(+this.databaseId).subscribe(data => {

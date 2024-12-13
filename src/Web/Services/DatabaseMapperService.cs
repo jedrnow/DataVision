@@ -50,6 +50,10 @@ public class DatabaseMapperService : IDatabaseMapperService
                 });
                 _context.DatabaseTableColumns.AddRange(newColumns);
 
+                await _context.SaveChangesAsync(cancellationToken);
+
+                var columns = await _context.DatabaseTableColumns.Include(x => x.DatabaseTable).AsNoTracking().Where(x => x.DatabaseId == databaseId && x.DatabaseTable!.Name == fetchedTable.Name).ToListAsync(cancellationToken);
+
                 foreach (var row in fetchedTable.Rows)
                 {
                     var newRow = new DatabaseTableRow()
@@ -59,7 +63,7 @@ public class DatabaseMapperService : IDatabaseMapperService
                     };
                     _context.DatabaseTableRows.Add(newRow);
 
-                    var newCellsDict = row.Cells.Select(c => (Cell: c, Column: newColumns.FirstOrDefault(col => col.Name == c.ColumnName)));
+                    var newCellsDict = row.Cells.Select(c => (Cell: c, Column: columns.FirstOrDefault(col => col.Name == c.ColumnName)));
 
                     foreach (var c in newCellsDict)
                     {
@@ -73,7 +77,7 @@ public class DatabaseMapperService : IDatabaseMapperService
                         {
                             DatabaseTable = newTable,
                             DatabaseTableRow = newRow,
-                            DatabaseTableColumn = c.Column,
+                            DatabaseTableColumnId = c.Column.Id,
                             Type = c.Column.Type,
                             Value = c.Cell.Value?.ToString(),
                             DatabaseId = databaseId,

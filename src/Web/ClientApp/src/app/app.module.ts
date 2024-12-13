@@ -19,6 +19,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { DatabaseDetailsComponent } from './databases/database-details/database-details.component';
 import { CommonModule } from '@angular/common';
 import { EditDatabaseComponent } from './databases/edit-database/edit-database.component';
+import { BrowseDatabaseComponent } from './databases/browse-database/browse-database.component';
 
 @NgModule({
     declarations: [
@@ -29,7 +30,8 @@ import { EditDatabaseComponent } from './databases/edit-database/edit-database.c
         PaginationComponent,
         AddDatabaseComponent,
         DatabaseDetailsComponent,
-        EditDatabaseComponent
+        EditDatabaseComponent,
+        BrowseDatabaseComponent
     ],
     bootstrap: [AppComponent],
     imports: [
@@ -41,8 +43,9 @@ import { EditDatabaseComponent } from './databases/edit-database/edit-database.c
             { path: '', component: HomeComponent, pathMatch: 'full' },
             { path: 'databases/add', component: AddDatabaseComponent },
             { path: 'databases', component: DatabasesComponent },
-            { path: 'databases/:id', component: DatabaseDetailsComponent },
-            { path: 'databases/:id/edit', component: EditDatabaseComponent },
+            { path: 'databases/:databaseId', component: DatabaseDetailsComponent },
+            { path: 'databases/:databaseId/edit', component: EditDatabaseComponent },
+            { path: 'databases/:databaseId/tables', component: BrowseDatabaseComponent },
         ]),
         BrowserAnimationsModule,
         ReactiveFormsModule,
