@@ -1,4 +1,5 @@
 ﻿using DataVision.Domain.Entities;
+using DataVision.Domain.Enums;
 
 namespace DataVision.Application.BackgroundJobs.Queries.GetBackgroundJobDetails;
 public class BackgroundJobDetailsDto
@@ -10,6 +11,8 @@ public class BackgroundJobDetailsDto
     public string? Message { get; set; }
     public string? Result { get; set; }
     public int? DatabaseId { get; set; }
+    public BackgroundJobType Type { get; set; }
+    public DateTimeOffset Created { get; set; }
 
     private class Mapping : Profile
     {

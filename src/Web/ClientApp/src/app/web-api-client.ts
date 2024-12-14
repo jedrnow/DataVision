@@ -839,6 +839,8 @@ export class BackgroundJobDetailsDto implements IBackgroundJobDetailsDto {
     message?: string | undefined;
     result?: string | undefined;
     databaseId?: number | undefined;
+    type?: BackgroundJobType;
+    created?: Date;
 
     constructor(data?: IBackgroundJobDetailsDto) {
         if (data) {
@@ -858,6 +860,8 @@ export class BackgroundJobDetailsDto implements IBackgroundJobDetailsDto {
             this.message = _data["message"];
             this.result = _data["result"];
             this.databaseId = _data["databaseId"];
+            this.type = _data["type"];
+            this.created = _data["created"] ? new Date(_data["created"].toString()) : <any>undefined;
         }
     }
 
@@ -877,6 +881,8 @@ export class BackgroundJobDetailsDto implements IBackgroundJobDetailsDto {
         data["message"] = this.message;
         data["result"] = this.result;
         data["databaseId"] = this.databaseId;
+        data["type"] = this.type;
+        data["created"] = this.created ? this.created.toISOString() : <any>undefined;
         return data;
     }
 }
@@ -889,6 +895,14 @@ export interface IBackgroundJobDetailsDto {
     message?: string | undefined;
     result?: string | undefined;
     databaseId?: number | undefined;
+    type?: BackgroundJobType;
+    created?: Date;
+}
+
+export enum BackgroundJobType {
+    PopulateDatabase = "PopulateDatabase",
+    ClearDatabase = "ClearDatabase",
+    DeleteDatabase = "DeleteDatabase",
 }
 
 export class PaginatedListOfBackgroundJobDetailsDto implements IPaginatedListOfBackgroundJobDetailsDto {

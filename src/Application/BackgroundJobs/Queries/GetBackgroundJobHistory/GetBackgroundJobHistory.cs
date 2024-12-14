@@ -26,6 +26,7 @@ public class GetBackgroundJobHistoryQueryHandler : IRequestHandler<GetBackground
         var jobs = _context.BackgroundJobs
             .AsNoTracking()
             .Where(x => x.DatabaseId == request.DatabaseId)
+            .OrderByDescending(x => x.Created)
             .ProjectTo<BackgroundJobDetailsDto>(_mapper.ConfigurationProvider);
 
         var paginatedJobList = await PaginatedList<BackgroundJobDetailsDto>.CreateAsync(jobs, request.PaginatedQuery.PageNumber, request.PaginatedQuery.PageSize);

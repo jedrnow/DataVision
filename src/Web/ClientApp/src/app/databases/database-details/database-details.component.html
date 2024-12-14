@@ -19,4 +19,44 @@
         <p><strong>Rows:</strong> {{ database.rowsCount }}</p>
         <p><strong>Cells:</strong> {{ database.cellsCount }}</p>
     </div>
+
+    <br>
+
+    <div *ngIf="database && jobHistory">
+        <h2>Database Action History</h2>
+    </div>
+    <table *ngIf="database && jobHistory" class="table table-striped" aria-labelledby="tableLabel">
+        <thead>
+            <tr>
+                <th>Date:</th>
+                <th>Type:</th>
+                <th>Completed:</th>
+                <th>Succeeded:</th>
+                <th>Result:</th>
+                <th>Additional message:</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let job of jobHistory; let i = index;">
+                <td>{{ job.created | date:'MM/dd/YYYY HH:mm:ss'}}</td>
+                <td>{{ job.type }}</td>
+                <td>
+                    <button class="btn btn-info" [disabled]="true">
+                        <ng-icon [name]="job.isCompleted ? 'bootstrapCheck' : 'bootstrapX'"></ng-icon>
+                    </button>
+                </td>
+                <td>
+                    <button class="btn btn-info" [disabled]="true">
+                        <ng-icon [name]="job.isSucceeded ? 'bootstrapCheck' : 'bootstrapX'"></ng-icon>
+                    </button>
+                </td>
+                <td>
+                    <button class="btn btn-info" [disabled]="true">
+                        <ng-icon name="matInfoOutline"></ng-icon>
+                    </button>
+                </td>
+                <td>{{ job.message }}</td>
+            </tr>
+        </tbody>
+    </table>
 </div>

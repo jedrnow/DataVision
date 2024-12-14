@@ -542,8 +542,29 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
+          },
+          "type": {
+            "$ref": "#/components/schemas/BackgroundJobType"
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
           }
         }
+      },
+      "BackgroundJobType": {
+        "type": "string",
+        "description": "",
+        "x-enumNames": [
+          "PopulateDatabase",
+          "ClearDatabase",
+          "DeleteDatabase"
+        ],
+        "enum": [
+          "PopulateDatabase",
+          "ClearDatabase",
+          "DeleteDatabase"
+        ]
       },
       "PaginatedListOfBackgroundJobDetailsDto": {
         "type": "object",
