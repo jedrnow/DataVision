@@ -17,6 +17,7 @@ export const API_BASE_URL = new InjectionToken<string>('API_BASE_URL');
 
 export interface IBackgroundJobsClient {
     getBackgroundJobDetails(id: number): Observable<BackgroundJobDetailsDto>;
+    getBackgroundJobHistory(databaseId: number, pageNumber: number, pageSize: number): Observable<PaginatedListOfBackgroundJobDetailsDto>;
 }
 
 @Injectable({
@@ -33,11 +34,10 @@ export class BackgroundJobsClient implements IBackgroundJobsClient {
     }
 
     getBackgroundJobDetails(id: number): Observable<BackgroundJobDetailsDto> {
-        let url_ = this.baseUrl + "/api/BackgroundJobs?";
+        let url_ = this.baseUrl + "/api/BackgroundJobs/{id}";
         if (id === undefined || id === null)
-            throw new Error("The parameter 'id' must be defined and cannot be null.");
-        else
-            url_ += "id=" + encodeURIComponent("" + id) + "&";
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
@@ -74,6 +74,66 @@ export class BackgroundJobsClient implements IBackgroundJobsClient {
             let result200: any = null;
             let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result200 = BackgroundJobDetailsDto.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    getBackgroundJobHistory(databaseId: number, pageNumber: number, pageSize: number): Observable<PaginatedListOfBackgroundJobDetailsDto> {
+        let url_ = this.baseUrl + "/api/BackgroundJobs/History?";
+        if (databaseId === undefined || databaseId === null)
+            throw new Error("The parameter 'databaseId' must be defined and cannot be null.");
+        else
+            url_ += "databaseId=" + encodeURIComponent("" + databaseId) + "&";
+        if (pageNumber === undefined || pageNumber === null)
+            throw new Error("The parameter 'pageNumber' must be defined and cannot be null.");
+        else
+            url_ += "pageNumber=" + encodeURIComponent("" + pageNumber) + "&";
+        if (pageSize === undefined || pageSize === null)
+            throw new Error("The parameter 'pageSize' must be defined and cannot be null.");
+        else
+            url_ += "pageSize=" + encodeURIComponent("" + pageSize) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetBackgroundJobHistory(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetBackgroundJobHistory(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<PaginatedListOfBackgroundJobDetailsDto>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<PaginatedListOfBackgroundJobDetailsDto>;
+        }));
+    }
+
+    protected processGetBackgroundJobHistory(response: HttpResponseBase): Observable<PaginatedListOfBackgroundJobDetailsDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = PaginatedListOfBackgroundJobDetailsDto.fromJS(resultData200);
             return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
@@ -778,6 +838,7 @@ export class BackgroundJobDetailsDto implements IBackgroundJobDetailsDto {
     isSucceeded?: boolean;
     message?: string | undefined;
     result?: string | undefined;
+    databaseId?: number | undefined;
 
     constructor(data?: IBackgroundJobDetailsDto) {
         if (data) {
@@ -796,6 +857,7 @@ export class BackgroundJobDetailsDto implements IBackgroundJobDetailsDto {
             this.isSucceeded = _data["isSucceeded"];
             this.message = _data["message"];
             this.result = _data["result"];
+            this.databaseId = _data["databaseId"];
         }
     }
 
@@ -814,6 +876,7 @@ export class BackgroundJobDetailsDto implements IBackgroundJobDetailsDto {
         data["isSucceeded"] = this.isSucceeded;
         data["message"] = this.message;
         data["result"] = this.result;
+        data["databaseId"] = this.databaseId;
         return data;
     }
 }
@@ -825,6 +888,71 @@ export interface IBackgroundJobDetailsDto {
     isSucceeded?: boolean;
     message?: string | undefined;
     result?: string | undefined;
+    databaseId?: number | undefined;
+}
+
+export class PaginatedListOfBackgroundJobDetailsDto implements IPaginatedListOfBackgroundJobDetailsDto {
+    items?: BackgroundJobDetailsDto[];
+    pageNumber?: number;
+    totalPages?: number;
+    totalCount?: number;
+    hasPreviousPage?: boolean;
+    hasNextPage?: boolean;
+
+    constructor(data?: IPaginatedListOfBackgroundJobDetailsDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            if (Array.isArray(_data["items"])) {
+                this.items = [] as any;
+                for (let item of _data["items"])
+                    this.items!.push(BackgroundJobDetailsDto.fromJS(item));
+            }
+            this.pageNumber = _data["pageNumber"];
+            this.totalPages = _data["totalPages"];
+            this.totalCount = _data["totalCount"];
+            this.hasPreviousPage = _data["hasPreviousPage"];
+            this.hasNextPage = _data["hasNextPage"];
+        }
+    }
+
+    static fromJS(data: any): PaginatedListOfBackgroundJobDetailsDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new PaginatedListOfBackgroundJobDetailsDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.items)) {
+            data["items"] = [];
+            for (let item of this.items)
+                data["items"].push(item.toJSON());
+        }
+        data["pageNumber"] = this.pageNumber;
+        data["totalPages"] = this.totalPages;
+        data["totalCount"] = this.totalCount;
+        data["hasPreviousPage"] = this.hasPreviousPage;
+        data["hasNextPage"] = this.hasNextPage;
+        return data;
+    }
+}
+
+export interface IPaginatedListOfBackgroundJobDetailsDto {
+    items?: BackgroundJobDetailsDto[];
+    pageNumber?: number;
+    totalPages?: number;
+    totalCount?: number;
+    hasPreviousPage?: boolean;
+    hasNextPage?: boolean;
 }
 
 export class PaginatedListOfDatabaseDto implements IPaginatedListOfDatabaseDto {
@@ -952,6 +1080,7 @@ export class DatabaseDetailsDto implements IDatabaseDetailsDto {
     isPopulated?: boolean;
     connectionString?: string | undefined;
     tablesCount?: number;
+    columnsCount?: number;
     rowsCount?: number;
     cellsCount?: number;
 
@@ -972,6 +1101,7 @@ export class DatabaseDetailsDto implements IDatabaseDetailsDto {
             this.isPopulated = _data["isPopulated"];
             this.connectionString = _data["connectionString"];
             this.tablesCount = _data["tablesCount"];
+            this.columnsCount = _data["columnsCount"];
             this.rowsCount = _data["rowsCount"];
             this.cellsCount = _data["cellsCount"];
         }
@@ -992,6 +1122,7 @@ export class DatabaseDetailsDto implements IDatabaseDetailsDto {
         data["isPopulated"] = this.isPopulated;
         data["connectionString"] = this.connectionString;
         data["tablesCount"] = this.tablesCount;
+        data["columnsCount"] = this.columnsCount;
         data["rowsCount"] = this.rowsCount;
         data["cellsCount"] = this.cellsCount;
         return data;
@@ -1005,6 +1136,7 @@ export interface IDatabaseDetailsDto {
     isPopulated?: boolean;
     connectionString?: string | undefined;
     tablesCount?: number;
+    columnsCount?: number;
     rowsCount?: number;
     cellsCount?: number;
 }

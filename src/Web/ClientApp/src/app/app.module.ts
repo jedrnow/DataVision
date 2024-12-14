@@ -20,6 +20,7 @@ import { DatabaseDetailsComponent } from './databases/database-details/database-
 import { CommonModule } from '@angular/common';
 import { EditDatabaseComponent } from './databases/edit-database/edit-database.component';
 import { BrowseDatabaseComponent } from './databases/browse-database/browse-database.component';
+import { ReportsComponent } from './reports/reports.component';
 
 @NgModule({
     declarations: [
@@ -31,7 +32,8 @@ import { BrowseDatabaseComponent } from './databases/browse-database/browse-data
         AddDatabaseComponent,
         DatabaseDetailsComponent,
         EditDatabaseComponent,
-        BrowseDatabaseComponent
+        BrowseDatabaseComponent,
+        ReportsComponent
     ],
     bootstrap: [AppComponent],
     imports: [
@@ -46,6 +48,7 @@ import { BrowseDatabaseComponent } from './databases/browse-database/browse-data
             { path: 'databases/:databaseId', component: DatabaseDetailsComponent },
             { path: 'databases/:databaseId/edit', component: EditDatabaseComponent },
             { path: 'databases/:databaseId/tables', component: BrowseDatabaseComponent },
+            { path: 'reports', component: ReportsComponent },
         ]),
         BrowserAnimationsModule,
         ReactiveFormsModule,

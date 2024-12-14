@@ -35,10 +35,13 @@ public class ClearDatabaseJob
             .ExecuteDeleteAsync(cancellationToken);
 
         database.IsPopulated = false;
+        job.Type = Domain.Enums.BackgroundJobType.ClearDatabase;
+        job.DatabaseId = database.Id;
 
         if (deleteAfterwards)
         {
             _context.Databases.Remove(database);
+            job.Type = Domain.Enums.BackgroundJobType.DeleteDatabase;
         }
 
         job.IsCompleted = true;

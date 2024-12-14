@@ -9,6 +9,7 @@ import { DatabaseDetailsDto, DatabasesClient } from 'src/app/web-api-client';
 })
 export class DatabaseDetailsComponent implements OnInit {
   database: DatabaseDetailsDto;
+  showConnectionString: boolean = false;
 
   constructor(private route: ActivatedRoute, private client: DatabasesClient) {}
 
@@ -23,5 +24,9 @@ export class DatabaseDetailsComponent implements OnInit {
         error: (error) => console.error(error),
       });
     }
+  }
+
+  doShowConnectionString(){
+    this.showConnectionString = true;
   }
 }

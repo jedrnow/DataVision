@@ -58,6 +58,8 @@ public class PopulateDatabaseJob
         }
 
         job.IsCompleted = true;
+        job.Type = Domain.Enums.BackgroundJobType.PopulateDatabase;
+        job.DatabaseId = databaseId;
 
         await _context.SaveChangesAsync(cancellationToken);
     }

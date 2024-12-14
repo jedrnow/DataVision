@@ -9,6 +9,7 @@ public class BackgroundJobDetailsDto
     public bool IsSucceeded { get; set; }
     public string? Message { get; set; }
     public string? Result { get; set; }
+    public int? DatabaseId { get; set; }
 
     private class Mapping : Profile
     {

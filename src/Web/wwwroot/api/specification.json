@@ -6,7 +6,7 @@
     "version": "1.0.0"
   },
   "paths": {
-    "/api/BackgroundJobs": {
+    "/api/BackgroundJobs/{id}": {
       "get": {
         "tags": [
           "BackgroundJobs"
@@ -15,7 +15,7 @@
         "parameters": [
           {
             "name": "id",
-            "in": "query",
+            "in": "path",
             "required": true,
             "schema": {
               "type": "integer",
@@ -31,6 +31,58 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/BackgroundJobDetailsDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/BackgroundJobs/History": {
+      "get": {
+        "tags": [
+          "BackgroundJobs"
+        ],
+        "operationId": "GetBackgroundJobHistory",
+        "parameters": [
+          {
+            "name": "databaseId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 2
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 3
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedListOfBackgroundJobDetailsDto"
                 }
               }
             }
@@ -485,6 +537,41 @@
           "result": {
             "type": "string",
             "nullable": true
+          },
+          "databaseId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        }
+      },
+      "PaginatedListOfBackgroundJobDetailsDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BackgroundJobDetailsDto"
+            }
+          },
+          "pageNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "hasPreviousPage": {
+            "type": "boolean"
+          },
+          "hasNextPage": {
+            "type": "boolean"
           }
         }
       },
@@ -575,6 +662,10 @@
             "nullable": true
           },
           "tablesCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "columnsCount": {
             "type": "integer",
             "format": "int32"
           },

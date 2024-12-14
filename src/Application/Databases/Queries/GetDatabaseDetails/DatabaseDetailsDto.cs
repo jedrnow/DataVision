@@ -10,6 +10,7 @@ public class DatabaseDetailsDto
     public bool IsPopulated { get; set; } = false;
     public string? ConnectionString { get; set; }
     public int TablesCount { get; set; }
+    public int ColumnsCount { get; set; }
     public int RowsCount { get; set; }
     public int CellsCount { get; set; }
 
@@ -19,6 +20,7 @@ public class DatabaseDetailsDto
         {
             CreateMap<Database, DatabaseDetailsDto>()
                 .ForMember(dest => dest.TablesCount, opt => opt.MapFrom(x => x.DatabaseTables.Count))
+                .ForMember(dest => dest.ColumnsCount, opt => opt.MapFrom(x => x.DatabaseTableColumns.Count))
                 .ForMember(dest => dest.RowsCount, opt => opt.MapFrom(x => x.DatabaseTableRows.Count))
                 .ForMember(dest => dest.CellsCount, opt => opt.MapFrom(x => x.DatabaseTableCells.Count));
         }
