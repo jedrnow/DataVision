@@ -1,8 +1,8 @@
-.buttonDiv{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
+// .buttonDiv{
+//     display: flex;
+//     justify-content: center;
+//     align-items: center;
+//   }
 
   .modal-body {
     word-wrap: break-word; /* Zawijanie długich słów */
@@ -35,3 +35,7 @@
     overflow-y: auto; /* Przewijanie w pionie */
   }
   
+  .database-details-container{
+    display: flex;
+    justify-content: space-between;
+  }

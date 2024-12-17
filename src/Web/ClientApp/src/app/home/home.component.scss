@@ -1,0 +1,36 @@
+  .hero-section {
+    background: linear-gradient(135deg, #9dccfd, #0056b3);
+    color: white;
+    padding: 60px 0;
+  }
+
+  .hero-section h1 {
+    font-size: 3rem;
+    font-weight: bold;
+  }
+
+  .hero-section p {
+    font-size: 1.2rem;
+    margin-top: 15px;
+  }
+
+  .features-section {
+    padding: 50px 0;
+  }
+
+  .feature-box {
+    text-align: center;
+    padding: 20px;
+  }
+
+  .feature-box i {
+    font-size: 3rem;
+    color: #007bff;
+  }
+
+  footer {
+    background-color: #eeeeee;
+    color: rgb(0, 0, 0);
+    text-align: center;
+    padding: 10px 0;
+  }

@@ -53,6 +53,12 @@ export class DatabaseDetailsComponent implements OnInit {
     }
   }
 
+  openModalWithConnectionString(connectionString: string): void {
+    const formattedContent = connectionString.split(';').join(';\n');
+    this.modalContent = formattedContent;
+    this.isModalOpen = true;
+  }
+
   closeModal(): void {
     this.isModalOpen = false;
   }
