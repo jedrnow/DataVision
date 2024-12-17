@@ -3,3 +3,35 @@
     justify-content: center;
     align-items: center;
   }
+
+  .modal-body {
+    word-wrap: break-word; /* Zawijanie długich słów */
+    overflow-wrap: break-word;
+    max-width: 100%; /* Utrzymanie maksymalnej szerokości */
+  }
+  
+  .modal-content {
+    max-width: 90%; /* Ogranicz szerokość modala */
+    margin: auto; /* Wyśrodkowanie modala */
+  }
+  
+  .modal-dialog {
+    max-width: 600px; /* Możesz dostosować szerokość modala */
+  }
+  
+  .modal-text {
+    white-space: pre-wrap; /* Zachowuje formatowanie, np. nowe linie */
+  }
+  
+  .json-content {
+    background-color: #f8f9fa; /* Jasne tło */
+    border: 1px solid #ddd; /* Ramka */
+    padding: 15px;
+    white-space: pre-wrap; /* Zachowanie formatowania */
+    word-wrap: break-word; /* Zawijanie tekstu */
+    font-family: "Courier New", Courier, monospace; /* Monospaced font */
+    color: #333;
+    max-height: 400px; /* Ograniczenie wysokości */
+    overflow-y: auto; /* Przewijanie w pionie */
+  }
+  

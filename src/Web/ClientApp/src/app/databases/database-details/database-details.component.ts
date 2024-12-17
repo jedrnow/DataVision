@@ -15,6 +15,8 @@ export class DatabaseDetailsComponent implements OnInit {
   database: DatabaseDetailsDto;
   jobHistory: BackgroundJobDetailsDto[] | null = null;
   showConnectionString: boolean = false;
+  isModalOpen: boolean = false;
+  modalContent: string = '';
 
   constructor(private route: ActivatedRoute, private client: DatabasesClient, private backgroundJobClient: BackgroundJobsClient) {}
 
@@ -37,6 +39,22 @@ export class DatabaseDetailsComponent implements OnInit {
         error: (error) => console.error(error),
       });
     }
+  }
+
+
+  openModal(jsonString: string): void {
+    try {
+      const parsedObject = JSON.parse(jsonString);
+      this.modalContent = JSON.stringify(parsedObject, null, 2); 
+      this.isModalOpen = true;
+    } catch (error) {
+      this.modalContent = jsonString;
+      this.isModalOpen = true;
+    }
+  }
+
+  closeModal(): void {
+    this.isModalOpen = false;
   }
 
   doShowConnectionString(){

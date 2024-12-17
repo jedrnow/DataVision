@@ -21,6 +21,8 @@ import { CommonModule } from '@angular/common';
 import { EditDatabaseComponent } from './databases/edit-database/edit-database.component';
 import { BrowseDatabaseComponent } from './databases/browse-database/browse-database.component';
 import { ReportsComponent } from './reports/reports.component';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { OverlayModule } from '@angular/cdk/overlay';
 
 @NgModule({
     declarations: [
@@ -53,6 +55,8 @@ import { ReportsComponent } from './reports/reports.component';
         BrowserAnimationsModule,
         ReactiveFormsModule,
         MatSnackBarModule,
+        MatTooltipModule,
+        OverlayModule,
         ModalModule.forRoot()
     ],
     providers: [
