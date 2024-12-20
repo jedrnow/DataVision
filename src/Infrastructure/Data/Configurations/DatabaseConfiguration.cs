@@ -34,5 +34,10 @@ public class DatabaseConfiguration : IEntityTypeConfiguration<Database>
             .WithOne(dt => dt.Database)
             .HasForeignKey(t => t.DatabaseId)
             .OnDelete(DeleteBehavior.ClientCascade);
+
+        builder.HasMany(t => t.Reports)
+            .WithOne(dt => dt.Database)
+            .HasForeignKey(t => t.DatabaseId)
+            .OnDelete(DeleteBehavior.ClientCascade);
     }
 }

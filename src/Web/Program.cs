@@ -1,5 +1,7 @@
+using Azure.Identity;
 using DataVision.Infrastructure.Data;
 using Hangfire;
+using Microsoft.Extensions.Azure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +10,13 @@ builder.AddKeyVaultIfConfigured();
 builder.AddApplicationServices();
 builder.AddInfrastructureServices();
 builder.AddWebServices();
+builder.Services.AddAzureClients(clientBuilder =>
+{
+    clientBuilder.AddBlobServiceClient(new Uri("https://datavisionstoragedev.blob.core.windows.net"));
+
+    DefaultAzureCredential credential = new();
+    clientBuilder.UseCredential(credential);
+});
 
 var app = builder.Build();
 

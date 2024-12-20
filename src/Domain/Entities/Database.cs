@@ -11,6 +11,7 @@ public class Database : BaseAuditableEntity
     public IList<DatabaseTableColumn> DatabaseTableColumns { get; private set; } = new List<DatabaseTableColumn>();
     public IList<DatabaseTableRow> DatabaseTableRows { get; private set; } = new List<DatabaseTableRow>();
     public IList<DatabaseTableCell> DatabaseTableCells { get; private set; } = new List<DatabaseTableCell>();
+    public IList<Report> Reports { get; private set; } = new List<Report>();
 
     public void Update(string? name, string? connectionString, DatabaseProvider databaseProvider, string? userId = null)
     {

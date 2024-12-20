@@ -10,6 +10,7 @@ public interface IApplicationDbContext
     DbSet<DatabaseTableRow> DatabaseTableRows {  get; }
     DbSet<DatabaseTableCell> DatabaseTableCells { get; }
     DbSet<BackgroundJob> BackgroundJobs { get; }
+    DbSet<Report> Reports { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }
