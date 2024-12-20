@@ -35,4 +35,13 @@ public class ExistenceService : IExistenceService
 
         return backgroundJob != null;
     }
+
+    public async Task<bool> ReportExistsAsync(int reportId, CancellationToken cancellationToken = default)
+    {
+        var report = await _context.Reports
+            .AsNoTracking()
+            .SingleOrDefaultAsync(x => x.Id == reportId, cancellationToken);
+
+        return report != null;
+    }
 }
