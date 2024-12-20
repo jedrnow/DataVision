@@ -23,6 +23,7 @@ import { BrowseDatabaseComponent } from './databases/browse-database/browse-data
 import { ReportsComponent } from './reports/reports.component';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { OverlayModule } from '@angular/cdk/overlay';
+import { AddReportComponent } from './reports/add-report/add-report.component';
 
 @NgModule({
     declarations: [
@@ -35,7 +36,8 @@ import { OverlayModule } from '@angular/cdk/overlay';
         DatabaseDetailsComponent,
         EditDatabaseComponent,
         BrowseDatabaseComponent,
-        ReportsComponent
+        ReportsComponent,
+        AddReportComponent
     ],
     bootstrap: [AppComponent],
     imports: [
@@ -51,6 +53,7 @@ import { OverlayModule } from '@angular/cdk/overlay';
             { path: 'databases/:databaseId/edit', component: EditDatabaseComponent },
             { path: 'databases/:databaseId/tables', component: BrowseDatabaseComponent },
             { path: 'reports', component: ReportsComponent },
+            { path: 'reports/add', component: AddReportComponent },
         ]),
         BrowserAnimationsModule,
         ReactiveFormsModule,

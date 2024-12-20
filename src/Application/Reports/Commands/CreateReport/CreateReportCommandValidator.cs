@@ -9,11 +9,11 @@ public class CreateReportCommandValidator : AbstractValidator<CreateReportComman
             .NotEmpty()
             .MaximumLength(255);
 
-        RuleFor(v => v.File)
-            .NotEmpty();
-
         RuleFor(v => v.DatabaseId)
             .NotEmpty()
             .MustAsync(existenceService.DatabaseExistsAsync);
+
+        RuleFor(v => v.TableIds)
+            .NotEmpty();
     }
 }

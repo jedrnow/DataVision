@@ -1,0 +1,50 @@
+<h1 id="tableLabel"><a routerLink="/reports" style="text-decoration: none;">Reports</a></h1>
+
+<div class="container">
+    <h2>Create Report</h2>
+  
+    <div class="form-group">
+      <label for="reportTitle">Report Title</label>
+      <input
+        id="reportTitle"
+        class="form-control"
+        type="text"
+        [(ngModel)]="reportTitle"
+        placeholder="Enter report title"
+      />
+    </div>
+
+    <div class="form-group">
+        <label for="dbSelect">Select Database</label>
+        <select
+          id="dbSelect"
+          class="form-control"
+          [(ngModel)]="selectedDatabaseId"
+          (ngModelChange)="getTables(selectedDatabaseId)"
+        >
+          <option *ngFor="let db of databases" [value]="db.id">
+            {{ db.name }}
+          </option>
+        </select>
+      </div>
+  
+    <div class="form-group" *ngIf="selectedDatabaseId">
+      <label for="tableSelect">Select Tables</label>
+      <select
+        id="tableSelect"
+        class="form-control"
+        multiple
+        [(ngModel)]="selectedTableIds"
+      >
+        <option *ngFor="let table of availableTables" [value]="table.id">
+          {{ table.name }}
+        </option>
+      </select>
+      <small class="form-text text-muted">
+        Hold Ctrl (or Command on Mac) to select multiple tables.
+      </small>
+    </div>
+  
+    <button class="btn btn-primary" (click)="doGenerate()">Generate Report</button>
+  </div>
+  

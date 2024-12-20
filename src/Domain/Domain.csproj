@@ -13,6 +13,7 @@
     <PackageReference Include="Hangfire.SqlServer" />
     <PackageReference Include="MediatR" />
     <PackageReference Include="Microsoft.Extensions.Azure" />
+    <PackageReference Include="QuestPDF" />
   </ItemGroup>
 
   <ItemGroup>

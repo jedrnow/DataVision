@@ -1,8 +1,9 @@
 ﻿using Azure.Storage.Blobs;
+using DataVision.Application.Common.Documents;
 using DataVision.Application.Common.Interfaces;
 using DataVision.Domain.Entities;
 using DataVision.Domain.Enums;
-using Microsoft.AspNetCore.Http;
+using QuestPDF.Fluent;
 
 namespace DataVision.Application.Reports.Commands.CreateReport;
 
@@ -10,7 +11,7 @@ public record CreateReportCommand : IRequest<int>
 {
     public int DatabaseId { get; init; }
     public string? Title { get; init; }
-    public IFormFile? File { get; init; }
+    public List<int> TableIds { get; init; } = [];
 }
 
 public class CreateReportCommandHandler : IRequestHandler<CreateReportCommand, int>
@@ -26,43 +27,39 @@ public class CreateReportCommandHandler : IRequestHandler<CreateReportCommand, i
 
     public async Task<int> Handle(CreateReportCommand request, CancellationToken cancellationToken)
     {
-        Guard.Against.Null(request.File, nameof(request.File));
+        var tables = await _context.DatabaseTables
+            .AsNoTracking()
+            .Include(x => x.Columns)
+            .Include(x => x.Rows)
+                .ThenInclude(r => r.Cells)
+            .Where(x => x.DatabaseId == request.DatabaseId && request.TableIds.Contains(x.Id))
+            .ToListAsync(cancellationToken);
 
-        var fileName = request.DatabaseId + "_" + request.File.FileName;
+        var fileName = $"Database_{request.DatabaseId}_Report_{DateTime.UtcNow:yyyyMMdd_HHmmss}.pdf";
+
+        using var memoryStream = new MemoryStream();
+        var document = new DatabaseReportDocument(tables);
+        document.GeneratePdf(memoryStream);
+
+        memoryStream.Position = 0;
+
+        var containerClient = _blobServiceClient.GetBlobContainerClient(BlobContainerNames.reports.ToString());
+        var blobClient = containerClient.GetBlobClient(fileName);
+
+        await blobClient.UploadAsync(memoryStream, overwrite: true, cancellationToken: cancellationToken);
 
         var report = new Report()
         {
             DatabaseId = request.DatabaseId,
             Title = request.Title,
-            Format = GetFormat(fileName),
+            Format = ReportFormat.Pdf,
             FileName = fileName,
         };
-
-        var containerClient = _blobServiceClient.GetBlobContainerClient(BlobContainerNames.reports.ToString());
-        var blobClient = containerClient.GetBlobClient(fileName);
-
-        await using var stream = request.File.OpenReadStream();
-        await blobClient.UploadAsync(stream, overwrite: true);
 
         _context.Reports.Add(report);
 
         await _context.SaveChangesAsync(cancellationToken);
 
         return report.Id;
-    }
-
-    private static ReportFormat GetFormat(string fileName)
-    {
-        if (fileName.EndsWith(".pdf"))
-        {
-            return ReportFormat.Pdf;
-        }
-
-        if (fileName.EndsWith(".xlsx"))
-        {
-            return ReportFormat.Xlsx;
-        }
-
-        throw new NotImplementedException();
     }
 }
