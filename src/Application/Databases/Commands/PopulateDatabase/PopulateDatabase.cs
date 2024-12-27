@@ -11,10 +11,12 @@ public record PopulateDatabaseCommand : IRequest<int>
 public class PopulateDatabaseCommandHandler : IRequestHandler<PopulateDatabaseCommand, int>
 {
     private readonly IApplicationDbContext _context;
+    private readonly IUser _user;
 
-    public PopulateDatabaseCommandHandler(IApplicationDbContext context)
+    public PopulateDatabaseCommandHandler(IApplicationDbContext context, IUser user)
     {
         _context = context;
+        _user = user;
     }
 
     public async Task<int> Handle(PopulateDatabaseCommand request, CancellationToken cancellationToken)
@@ -28,7 +30,7 @@ public class PopulateDatabaseCommandHandler : IRequestHandler<PopulateDatabaseCo
         _context.BackgroundJobs.Add(job);
         await _context.SaveChangesAsync(cancellationToken);
 
-        var externalJobId = Hangfire.BackgroundJob.Enqueue<PopulateDatabaseJob>(x => x.Run(job.Id, request.DatabaseId, cancellationToken));
+        var externalJobId = Hangfire.BackgroundJob.Enqueue<PopulateDatabaseJob>(x => x.Run(job.Id, _user.Id, request.DatabaseId, cancellationToken));
 
         job.ExternalJobId = externalJobId;
         _context.BackgroundJobs.Update(job);

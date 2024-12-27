@@ -6,5 +6,6 @@ public enum BackgroundJobType
 {
     PopulateDatabase,
     ClearDatabase,
-    DeleteDatabase
+    DeleteDatabase,
+    CreateReport,
 }

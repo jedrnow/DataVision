@@ -264,6 +264,109 @@
         }
       }
     },
+    "/api/Databases/List": {
+      "get": {
+        "tags": [
+          "Databases"
+        ],
+        "operationId": "GetDatabasesList",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/IdNameDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Databases/{id}/Tables/List": {
+      "get": {
+        "tags": [
+          "Databases"
+        ],
+        "operationId": "GetTablesList",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/IdNameDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Databases/{id}/Tables/{tableId}/Columns/List": {
+      "get": {
+        "tags": [
+          "Databases"
+        ],
+        "operationId": "GetColumnsList",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "tableId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 2
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/IdNameDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Databases/TestConnection": {
       "get": {
         "tags": [
@@ -540,6 +643,46 @@
             }
           }
         }
+      },
+      "get": {
+        "tags": [
+          "Reports"
+        ],
+        "operationId": "GetReports",
+        "parameters": [
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 2
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedListOfReportDto"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/Reports/{id}": {
@@ -623,12 +766,14 @@
         "x-enumNames": [
           "PopulateDatabase",
           "ClearDatabase",
-          "DeleteDatabase"
+          "DeleteDatabase",
+          "CreateReport"
         ],
         "enum": [
           "PopulateDatabase",
           "ClearDatabase",
-          "DeleteDatabase"
+          "DeleteDatabase",
+          "CreateReport"
         ]
       },
       "PaginatedListOfBackgroundJobDetailsDto": {
@@ -762,6 +907,20 @@
           "cellsCount": {
             "type": "integer",
             "format": "int32"
+          }
+        }
+      },
+      "IdNameDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
           }
         }
       },
@@ -1027,6 +1186,97 @@
               "type": "integer",
               "format": "int32"
             }
+          },
+          "format": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ReportFormat"
+              }
+            ]
+          }
+        }
+      },
+      "ReportFormat": {
+        "type": "string",
+        "description": "",
+        "x-enumNames": [
+          "Pdf",
+          "Xlsx"
+        ],
+        "enum": [
+          "Pdf",
+          "Xlsx"
+        ]
+      },
+      "PaginatedListOfReportDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReportDto"
+            }
+          },
+          "pageNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "hasPreviousPage": {
+            "type": "boolean"
+          },
+          "hasNextPage": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ReportDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "databaseId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "format": {
+            "$ref": "#/components/schemas/ReportFormat"
+          },
+          "fileName": {
+            "type": "string",
+            "nullable": true
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastModified": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedBy": {
+            "type": "string",
+            "nullable": true
           }
         }
       }

@@ -18,6 +18,11 @@ builder.Services.AddAzureClients(clientBuilder =>
     clientBuilder.UseCredential(credential);
 });
 
+string relativePath = @"..\..\..\..\datavision-445518-bcc611d60bf2.json";
+
+string jsonKeyPath = Path.GetFullPath(relativePath);
+Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", jsonKeyPath);
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

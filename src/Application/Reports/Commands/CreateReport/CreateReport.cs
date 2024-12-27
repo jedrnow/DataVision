@@ -1,9 +1,10 @@
 ﻿using Azure.Storage.Blobs;
 using DataVision.Application.Common.Documents;
 using DataVision.Application.Common.Interfaces;
+using DataVision.Application.Common.Jobs;
 using DataVision.Domain.Entities;
 using DataVision.Domain.Enums;
-using QuestPDF.Fluent;
+using Microsoft.Extensions.Configuration;
 
 namespace DataVision.Application.Reports.Commands.CreateReport;
 
@@ -12,54 +13,39 @@ public record CreateReportCommand : IRequest<int>
     public int DatabaseId { get; init; }
     public string? Title { get; init; }
     public List<int> TableIds { get; init; } = [];
+    public ReportFormat? Format { get; init; }
 }
 
 public class CreateReportCommandHandler : IRequestHandler<CreateReportCommand, int>
 {
     private readonly IApplicationDbContext _context;
-    private readonly BlobServiceClient _blobServiceClient;
+    private readonly IUser _user;
 
-    public CreateReportCommandHandler(IApplicationDbContext context, BlobServiceClient blobServiceClient)
+    public CreateReportCommandHandler(IApplicationDbContext context, IUser user)
     {
         _context = context;
-        _blobServiceClient = blobServiceClient;
+        _user = user;
     }
 
     public async Task<int> Handle(CreateReportCommand request, CancellationToken cancellationToken)
     {
-        var tables = await _context.DatabaseTables
-            .AsNoTracking()
-            .Include(x => x.Columns)
-            .Include(x => x.Rows)
-                .ThenInclude(r => r.Cells)
-            .Where(x => x.DatabaseId == request.DatabaseId && request.TableIds.Contains(x.Id))
-            .ToListAsync(cancellationToken);
+        var userId = _user.Id;
+        var database = await _context.Databases.SingleOrDefaultAsync(x => x.Id == request.DatabaseId, cancellationToken);
 
-        var fileName = $"Database_{request.DatabaseId}_Report_{DateTime.UtcNow:yyyyMMdd_HHmmss}.pdf";
+        Guard.Against.NotFound(request.DatabaseId, database);
+        Guard.Against.NullOrEmpty(request.Title, parameterName: nameof(request.Title));
+        Guard.Against.Null(request.Format, parameterName: nameof(request.Format));
 
-        using var memoryStream = new MemoryStream();
-        var document = new DatabaseReportDocument(tables);
-        document.GeneratePdf(memoryStream);
-
-        memoryStream.Position = 0;
-
-        var containerClient = _blobServiceClient.GetBlobContainerClient(BlobContainerNames.reports.ToString());
-        var blobClient = containerClient.GetBlobClient(fileName);
-
-        await blobClient.UploadAsync(memoryStream, overwrite: true, cancellationToken: cancellationToken);
-
-        var report = new Report()
-        {
-            DatabaseId = request.DatabaseId,
-            Title = request.Title,
-            Format = ReportFormat.Pdf,
-            FileName = fileName,
-        };
-
-        _context.Reports.Add(report);
-
+        var job = new BackgroundJob();
+        _context.BackgroundJobs.Add(job);
         await _context.SaveChangesAsync(cancellationToken);
 
-        return report.Id;
+        var externalJobId = Hangfire.BackgroundJob.Enqueue<CreateReportJob>(x => x.Run(job.Id, userId, request.Title, request.DatabaseId, request.Format, request.TableIds, cancellationToken));
+
+        job.ExternalJobId = externalJobId;
+        _context.BackgroundJobs.Update(job);
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return job.Id;
     }
 }

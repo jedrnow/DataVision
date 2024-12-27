@@ -1,68 +1,77 @@
 ﻿using DataVision.Domain.Entities;
-using QuestPDF.Fluent;
-using QuestPDF.Helpers;
-using QuestPDF.Infrastructure;
+using Google.Cloud.Storage.V1;
+using iText.Kernel.Pdf;
+using iText.Layout;
+using iText.Layout.Element;
+using iText.Layout.Properties;
+using Microsoft.Extensions.Configuration;
 
-namespace DataVision.Application.Common.Documents;
-
-public class DatabaseReportDocument : IDocument
+namespace DataVision.Application.Common.Documents
 {
-    private readonly List<DatabaseTable> _tables;
-
-    public DatabaseReportDocument(List<DatabaseTable> tables)
+    public class DatabaseReportDocument
     {
-        _tables = tables;
-        QuestPDF.Settings.License = LicenseType.Community;
-    }
+        private readonly List<DatabaseTable> _tables;
+        private readonly string _fileName;
+        private readonly IConfiguration _configuration;
 
-    public DocumentMetadata GetMetadata() => DocumentMetadata.Default;
-
-    public void Compose(IDocumentContainer container)
-    {
-        container.Page(page =>
+        public DatabaseReportDocument(List<DatabaseTable> tables, string fileName, IConfiguration configuration)
         {
-            page.Size(PageSizes.A4);
-            page.Margin(20);
-            page.PageColor(Colors.White);
-            page.DefaultTextStyle(x => x.FontSize(12));
+            _tables = tables;
+            _fileName = fileName;
+            _configuration = configuration;
+        }
 
-            page.Content().Column(stack =>
+        public async Task GeneratePdfAndUploadAsync()
+        {
+            var memoryStream = new MemoryStream();
+
+            using (var writer = new PdfWriter(memoryStream))
+            using (var pdf = new PdfDocument(writer))
             {
+                var document = new Document(pdf);
+
+                var counter = _tables.Count;
                 foreach (var table in _tables)
                 {
-                    stack.Item().PaddingBottom(20).Table(tableBuilder =>
+                    document.Add(new Paragraph(table.Name)
+                        .SetTextAlignment(TextAlignment.CENTER)
+                        .SetFontSize(16));
+
+                    var pdfTable = new Table(table.Columns.Count, true).SetAutoLayout();
+
+
+                    foreach (var column in table.Columns)
                     {
-                        // Header Row
-                        tableBuilder.ColumnsDefinition(columns =>
-                        {
-                            foreach (var _ in table.Columns)
-                                columns.RelativeColumn();
-                        });
+                        pdfTable.AddHeaderCell(new Cell().Add(new Paragraph(column.Name)));
+                    }
 
-                        tableBuilder.Header(header =>
+                    foreach (var row in table.Rows)
+                    {
+                        foreach (var cell in row.Cells)
                         {
-                            foreach (var column in table.Columns)
-                            {
-                                header.Cell().Background(Colors.Grey.Lighten2).Padding(5).Text(column.Name);
-                            }
-                        });
-
-                        // Data Rows
-                        foreach (var row in table.Rows)
-                        {
-                            tableBuilder.Cell().Row(rowBuilder =>
-                            {
-                                foreach (var cell in row.Cells)
-                                {
-                                    rowBuilder.AutoItem().Text(cell.Value);
-                                }
-                            });
+                            pdfTable.AddCell(new Cell().Add(new Paragraph(cell.Value)));
                         }
-                    });
-                }
-            });
+                    }
 
-            page.Footer().AlignCenter().Text("Generated Report - DataVision");
-        });
+                    document.Add(pdfTable);
+                    pdfTable.Complete();
+                    counter--;
+                    if(counter > 0)
+                    {
+                        document.Add(new AreaBreak(AreaBreakType.NEXT_PAGE));
+                    }
+                }
+                
+                document.Close();
+            }
+
+            var storageClient = StorageClient.Create();
+            var bucketName = _configuration.GetSection("GoogleCloudStorage").GetValue<string>("ContainerName");
+            
+            var pdfStream = memoryStream.ToArray();
+
+            using var stream = new MemoryStream(pdfStream);
+            await storageClient.UploadObjectAsync(bucketName, _fileName, "application/pdf", stream);
+        }
     }
 }

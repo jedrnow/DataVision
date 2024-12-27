@@ -44,7 +44,7 @@ export class BrowseDatabaseComponent implements OnInit {
       next: (result) => {
         this.tables = result.items;
         if (this.tables.length > 0) {
-          this.selectTable(this.tables[0]); // Wybierz pierwszą tabelę jako domyślną
+          this.selectTable(this.tables[0]);
         }
       },
       error: (error) => console.error('Error loading tables:', error),

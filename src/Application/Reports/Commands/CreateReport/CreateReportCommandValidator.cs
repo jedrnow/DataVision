@@ -15,5 +15,10 @@ public class CreateReportCommandValidator : AbstractValidator<CreateReportComman
 
         RuleFor(v => v.TableIds)
             .NotEmpty();
+
+        RuleFor(v => v.Format)
+            .NotNull()
+            .NotEmpty()
+            .IsInEnum();
     }
 }

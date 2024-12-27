@@ -14,7 +14,7 @@ public class DatabaseMapperService : IDatabaseMapperService
         _context = context;
     }
 
-    public async Task<DatabaseMappingResult> MapDatabase(int databaseId, List<FetchedTable> fetchedTables, CancellationToken cancellationToken = default)
+    public async Task<DatabaseMappingResult> MapDatabase(int databaseId, List<FetchedTable> fetchedTables, string? userId, CancellationToken cancellationToken = default)
     {
         var result = new DatabaseMappingResult();
 
@@ -36,6 +36,8 @@ public class DatabaseMapperService : IDatabaseMapperService
                 {
                     Name = fetchedTable.Name,
                     DatabaseId = databaseId,
+                    CreatedBy = userId,
+                    LastModifiedBy = userId,
                 };
                 _context.DatabaseTables.Add(newTable);
                 result.TablesTotal++;
@@ -47,6 +49,8 @@ public class DatabaseMapperService : IDatabaseMapperService
                     DatabaseTable = newTable,
                     Type = c.DataType,
                     DatabaseId = databaseId,
+                    CreatedBy = userId,
+                    LastModifiedBy = userId,
                 });
                 _context.DatabaseTableColumns.AddRange(newColumns);
 
@@ -60,6 +64,8 @@ public class DatabaseMapperService : IDatabaseMapperService
                     {
                         DatabaseTable = newTable,
                         DatabaseId = databaseId,
+                        CreatedBy = userId,
+                        LastModifiedBy = userId,
                     };
                     _context.DatabaseTableRows.Add(newRow);
 
@@ -81,6 +87,8 @@ public class DatabaseMapperService : IDatabaseMapperService
                             Type = c.Column.Type,
                             Value = c.Cell.Value?.ToString(),
                             DatabaseId = databaseId,
+                            CreatedBy = userId,
+                            LastModifiedBy = userId,
                         };
                         _context.DatabaseTableCells.Add(newCell);
                     }

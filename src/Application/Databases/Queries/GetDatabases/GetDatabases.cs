@@ -23,7 +23,7 @@ public class GetDatabasesQueryHandler : IRequestHandler<GetDatabasesQuery, Pagin
     {
         var databases = _context.Databases
             .AsNoTracking()
-            .OrderBy(x => x.Created)
+            .OrderByDescending(x => x.Created)
             .ProjectTo<DatabaseDto>(_mapper.ConfigurationProvider);
 
         var paginatedDatabasesList = await PaginatedList<DatabaseDto>.CreateAsync(databases, request.PaginatedQuery.PageNumber, request.PaginatedQuery.PageSize);

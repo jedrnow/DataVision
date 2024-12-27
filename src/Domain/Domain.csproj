@@ -11,9 +11,10 @@
     <PackageReference Include="Hangfire.AspNetCore" />
     <PackageReference Include="Hangfire.Core" />
     <PackageReference Include="Hangfire.SqlServer" />
+    <PackageReference Include="itext7" />
+    <PackageReference Include="itext7.bouncy-castle-adapter" />
     <PackageReference Include="MediatR" />
     <PackageReference Include="Microsoft.Extensions.Azure" />
-    <PackageReference Include="QuestPDF" />
   </ItemGroup>
 
   <ItemGroup>

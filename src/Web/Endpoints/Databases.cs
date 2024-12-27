@@ -5,8 +5,11 @@ using DataVision.Application.Databases.Commands.CreateDatabase;
 using DataVision.Application.Databases.Commands.DeleteDatabase;
 using DataVision.Application.Databases.Commands.PopulateDatabase;
 using DataVision.Application.Databases.Commands.UpdateDatabase;
+using DataVision.Application.Databases.Queries.GetColumnsList;
 using DataVision.Application.Databases.Queries.GetDatabaseDetails;
 using DataVision.Application.Databases.Queries.GetDatabases;
+using DataVision.Application.Databases.Queries.GetDatabasesList;
+using DataVision.Application.Databases.Queries.GetTablesList;
 using DataVision.Application.Databases.Queries.TestConnection;
 using DataVision.Domain.Enums;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -21,6 +24,9 @@ public class Databases : EndpointGroupBase
             .RequireAuthorization()
             .MapGet(GetDatabases)
             .MapGet(GetDatabaseDetails, "{id}")
+            .MapGet(GetDatabasesList, "List")
+            .MapGet(GetTablesList, "{id}/Tables/List")
+            .MapGet(GetColumnsList, "{id}/Tables/{tableId}/Columns/List")
             .MapGet(TestConnection, "TestConnection")
             .MapPost(CreateDatabase)
             .MapPost(PopulateDatabase, "{id}/Populate")
@@ -38,6 +44,43 @@ public class Databases : EndpointGroupBase
                 PageNumber = pageNumber,
                 PageSize = pageSize
             }
+        };
+
+        var result = await sender.Send(query);
+
+        return TypedResults.Ok(result);
+    }
+
+    public async Task<Ok<List<IdNameDto>>> GetDatabasesList(ISender sender)
+    {
+        var query = new GetDatabasesListQuery()
+        {
+
+        };
+
+        var result = await sender.Send(query);
+
+        return TypedResults.Ok(result);
+    }
+
+    public async Task<Ok<List<IdNameDto>>> GetTablesList(ISender sender, int id)
+    {
+        var query = new GetTablesListQuery()
+        {
+            DatabaseId = id
+        };
+
+        var result = await sender.Send(query);
+
+        return TypedResults.Ok(result);
+    }
+
+    public async Task<Ok<List<IdNameDto>>> GetColumnsList(ISender sender, int id, int tableId)
+    {
+        var query = new GetColumnsListQuery()
+        {
+            DatabaseId = id,
+            DatabaseTableId = tableId
         };
 
         var result = await sender.Send(query);

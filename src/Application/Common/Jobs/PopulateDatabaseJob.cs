@@ -15,7 +15,7 @@ public class PopulateDatabaseJob
         _dbMapperService = dbMapperService;
     }
 
-    public async Task Run(int jobId, int databaseId, CancellationToken cancellationToken = default)
+    public async Task Run(int jobId, string? userId, int databaseId, CancellationToken cancellationToken = default)
     {
         var job = await _context.BackgroundJobs.SingleOrDefaultAsync(x => x.Id == jobId, cancellationToken);
         Guard.Against.NotFound(jobId, job);
@@ -47,7 +47,7 @@ public class PopulateDatabaseJob
         }
         else
         {
-            var result = await _dbMapperService.MapDatabase(databaseId, databaseFetchingResult.Tables);
+            var result = await _dbMapperService.MapDatabase(databaseId, databaseFetchingResult.Tables, userId);
             if (result.Success)
             {
                 database.IsPopulated = true;

@@ -3,3 +3,45 @@
 <div>
   <button class="btn btn-primary" routerLink="/reports/add">Create New Report</button>
 </div>
+
+<br>
+
+<table class="table table-striped" aria-labelledby="tableLabel">
+  <thead>
+    <tr>
+      <th>Title</th>
+      <th>Format</th>
+      <th>Created</th>
+      <th>Last Modified</th>
+      <th>Download</th>
+      <th>Delete</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let report of reports">
+      <td>{{ report.title }}</td>
+      <td>{{ report.format }}</td>
+      <td>{{ report.created | date:'short' }}</td>
+      <td>{{ report.lastModified | date:'short' }}</td>
+      <td>
+        <button class="btn btn-success" (click)="downloadReport(report)">
+          <ng-icon name="matDownloadOutline"></ng-icon>
+        </button>
+      </td>
+      <td>
+        <button class="btn btn-danger" (click)="deleteReport(report)">
+          <ng-icon name="matDeleteOutline"></ng-icon>
+        </button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<app-pagination 
+  [pageNumber]="pageNumber" 
+  [totalPages]="totalPages"
+  [pageSize]="pageSize"
+  [pageSizeOptions]="[5, 10, 20, 50]" 
+  (pageChange)="changePage($event)" 
+  (pageSizeChange)="changePageSize($event)">
+</app-pagination>
