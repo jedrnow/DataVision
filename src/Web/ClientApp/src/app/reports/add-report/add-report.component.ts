@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { ToastService } from 'src/app/common/toast/toast.service';
-import { BackgroundJobsClient, CreateReportCommand, DatabasesClient, DatabaseTableDto, DatabaseTablesClient, ReportFormat, ReportsClient } from 'src/app/web-api-client';
+import { BackgroundJobsClient, CreateReportCommand, DatabasesClient, DatabaseTableDto, DatabaseTablesClient, IdNameDto, ReportFormat, ReportsClient } from 'src/app/web-api-client';
 
 @Component({
   selector: 'app-add-report',
@@ -15,8 +15,8 @@ export class AddReportComponent implements OnInit {
   selectedTableIds: string[] = [];
   selectedFormat: ReportFormat | null = null;
   
-  databases: DatabaseTableDto[] = [];
-  availableTables: DatabaseTableDto[] = [];
+  databases: IdNameDto[] = [];
+  availableTables: IdNameDto[] = [];
   availableFormats: ReportFormat[] = [ReportFormat.Pdf, ReportFormat.Xlsx];
 
   jobInProgress = new BehaviorSubject<boolean>(false);
@@ -24,7 +24,6 @@ export class AddReportComponent implements OnInit {
 
   constructor(
     private dbClient: DatabasesClient,
-    private dbTableClient: DatabaseTablesClient, 
     private reportsClient: ReportsClient, 
     private router: Router,
     private toastService: ToastService,
@@ -36,11 +35,11 @@ export class AddReportComponent implements OnInit {
   }
 
   getDatabases(){
-    this.dbClient.getDatabases(1,20).subscribe(v => this.databases = v.items);
+    this.dbClient.getDatabasesList().subscribe(v => this.databases = v);
   }
 
   getTables(databaseId: number){
-    this.dbTableClient.getDatabaseTables(databaseId, 1, 20).subscribe(v => this.availableTables = v.items);
+    this.dbClient.getTablesList(databaseId).subscribe(v => this.availableTables = v);
   }
 
   doGenerate() {

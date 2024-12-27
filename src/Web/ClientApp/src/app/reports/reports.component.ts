@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ReportsClient, ReportDto } from '../web-api-client';
 import { ToastService } from '../common/toast/toast.service';
 import { provideIcons } from '@ng-icons/core';
+import { saveAs } from 'file-saver';
 import { ICONS } from '../common/icon';
 
 @Component({
@@ -35,8 +36,16 @@ export class ReportsComponent implements OnInit {
   }
 
   downloadReport(report: ReportDto): void {
-    // Implement download logic here
-    this.toastService.showSuccess(`Downloading report: ${report.title}`);
+    this.reportsClient.downloadReport(report.id).subscribe({
+      next: (response) => {
+        const blob = new Blob([response], { type: response.type });
+        saveAs(blob, report.fileName);
+        this.toastService.showSuccess(`Downloading report: ${report.title}`);
+      },
+      error: (error) => {
+        this.toastService.showError('Failed to download report. ' + error.message);
+      }
+    });
   }
 
   deleteReport(report: ReportDto): void {
@@ -50,7 +59,7 @@ export class ReportsComponent implements OnInit {
       }
     });
   }
-  
+
   changePage(event: { pageNumber: number, pageSize: number }): void {
     this.pageNumber = event.pageNumber;
     this.pageSize = event.pageSize;

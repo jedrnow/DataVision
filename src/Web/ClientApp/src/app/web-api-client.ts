@@ -1012,6 +1012,7 @@ export interface IReportsClient {
     createReport(command: CreateReportCommand): Observable<number>;
     getReports(pageNumber: number, pageSize: number): Observable<PaginatedListOfReportDto>;
     deleteReport(id: number): Observable<boolean>;
+    downloadReport(id: number): Observable<Blob>;
 }
 
 @Injectable({
@@ -1186,6 +1187,54 @@ export class ReportsClient implements IReportsClient {
             }));
         }
         return _observableOf(null as any);
+    }
+
+    downloadReport(id: number): Observable<Blob> {
+        let url_ = this.baseUrl + "/api/Reports/{id}/Download";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+    
+        let options_: any = {
+            observe: "response" as const,
+            responseType: "blob" as const,
+            headers: new HttpHeaders({
+            })
+        };
+    
+        return this.http.request("get", url_, options_).pipe(
+            _observableMergeMap((response_: any) => {
+                return this.processDownloadReport(response_);
+            }),
+            _observableCatch((response_: any) => {
+                if (response_ instanceof HttpResponseBase) {
+                    try {
+                        return this.processDownloadReport(response_ as any);
+                    } catch (e) {
+                        return _observableThrow(e) as any as Observable<Blob>;
+                    }
+                } else
+                    return _observableThrow(response_) as any as Observable<Blob>;
+            })
+        );
+    }
+    
+    protected processDownloadReport(response: HttpResponseBase): Observable<Blob> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+    
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return _observableOf(responseBlob as Blob);
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+                return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(responseBlob as Blob);
     }
 }
 

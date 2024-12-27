@@ -1,8 +1,10 @@
 ﻿using DataVision.Application.Common.Models;
 using DataVision.Application.Reports.Commands.CreateReport;
 using DataVision.Application.Reports.Commands.DeleteReport;
+using DataVision.Application.Reports.Commands.DownloadReport;
 using DataVision.Application.Reports.Queries.GetReports;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 
 namespace DataVision.Web.Endpoints;
 
@@ -14,7 +16,8 @@ public class Reports : EndpointGroupBase
             .RequireAuthorization()
             .MapPost(CreateReport)
             .MapGet(GetReports)
-            .MapDelete(DeleteReport, "{id}");
+            .MapDelete(DeleteReport, "{id}")
+            .MapGet(DownloadReport, "{id}/Download");
     }
 
     public async Task<Ok<PaginatedList<ReportDto>>> GetReports(ISender sender, int pageNumber, int pageSize)
@@ -32,6 +35,7 @@ public class Reports : EndpointGroupBase
 
         return TypedResults.Ok(result);
     }
+
     public async Task<Created<int>> CreateReport(ISender sender, CreateReportCommand command)
     {
         var id = await sender.Send(command);
@@ -46,5 +50,14 @@ public class Reports : EndpointGroupBase
         var result = await sender.Send(command);
 
         return TypedResults.Ok(result);
+    }
+
+    public async Task<IResult> DownloadReport(ISender sender, int id)
+    {
+        var command = new DownloadReportCommand() { ReportId = id };
+
+        var file = await sender.Send(command);
+
+        return Results.File(file.Content, "application/octet-stream", file.FileName);
     }
 }
