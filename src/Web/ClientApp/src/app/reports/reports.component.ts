@@ -2,8 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { ReportsClient, ReportDto } from '../web-api-client';
 import { ToastService } from '../common/toast/toast.service';
 import { provideIcons } from '@ng-icons/core';
-import { saveAs } from 'file-saver';
 import { ICONS } from '../common/icon';
+import { ReportsDownloader } from '../common/reports-downloader';
+import { saveAs } from 'file-saver-es';
 
 @Component({
   selector: 'app-reports',
@@ -17,7 +18,7 @@ export class ReportsComponent implements OnInit {
   public pageSize: number = 5;
   public totalPages: number = 0;
 
-  constructor(private reportsClient: ReportsClient, private toastService: ToastService) {}
+  constructor(private reportsClient: ReportsClient, private toastService: ToastService, private reportsDownloader: ReportsDownloader) {}
 
   ngOnInit(): void {
     this.loadReports();
@@ -36,13 +37,24 @@ export class ReportsComponent implements OnInit {
   }
 
   downloadReport(report: ReportDto): void {
-    this.reportsClient.downloadReport(report.id).subscribe({
+    this.reportsDownloader.downloadReport(report.id).subscribe({
       next: (response) => {
         const blob = new Blob([response], { type: response.type });
-        saveAs(blob, report.fileName);
-        this.toastService.showSuccess(`Downloading report: ${report.title}`);
+        if (blob && report.fileName) {
+          try {
+            saveAs(blob, report.fileName);
+            this.toastService.showSuccess(`Downloading report: ${report.title}`);
+          } catch (error) {
+            console.error('Error saving file:', error);
+            this.toastService.showError('Failed to save the report.');
+          }
+        } else {
+          console.error('Invalid blob or fileName:', blob, report.fileName);
+          this.toastService.showError('Failed to download report. Invalid data.');
+        }
       },
       error: (error) => {
+        console.error('Failed to download report:', error);
         this.toastService.showError('Failed to download report. ' + error.message);
       }
     });

@@ -5,6 +5,7 @@ using DataVision.Application.Reports.Commands.DownloadReport;
 using DataVision.Application.Reports.Queries.GetReports;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using NSwag.Annotations;
 
 namespace DataVision.Web.Endpoints;
 
@@ -52,6 +53,7 @@ public class Reports : EndpointGroupBase
         return TypedResults.Ok(result);
     }
 
+    [OpenApiIgnore]
     public async Task<IResult> DownloadReport(ISender sender, int id)
     {
         var command = new DownloadReportCommand() { ReportId = id };

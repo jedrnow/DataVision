@@ -75,12 +75,13 @@ public class Databases : EndpointGroupBase
         return TypedResults.Ok(result);
     }
 
-    public async Task<Ok<List<IdNameDto>>> GetColumnsList(ISender sender, int id, int tableId)
+    public async Task<Ok<List<IdNameDto>>> GetColumnsList(ISender sender, int id, int tableId, bool onlyNumeric)
     {
         var query = new GetColumnsListQuery()
         {
             DatabaseId = id,
-            DatabaseTableId = tableId
+            DatabaseTableId = tableId,
+            OnlyNumeric = onlyNumeric
         };
 
         var result = await sender.Send(query);

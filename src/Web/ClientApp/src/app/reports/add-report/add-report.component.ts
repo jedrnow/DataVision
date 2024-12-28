@@ -12,12 +12,16 @@ import { BackgroundJobsClient, CreateReportCommand, DatabasesClient, DatabaseTab
 export class AddReportComponent implements OnInit {
   reportTitle: string = '';
   selectedDatabaseId: number | null = null;
-  selectedTableIds: string[] = [];
+  selectedTableIds: number[] = [];
   selectedFormat: ReportFormat | null = null;
   
   databases: IdNameDto[] = [];
   availableTables: IdNameDto[] = [];
-  availableFormats: ReportFormat[] = [ReportFormat.Pdf, ReportFormat.Xlsx];
+  availableFormats: ReportFormat[] = [ReportFormat.Pdf, ReportFormat.Xlsx, ReportFormat.Html];
+
+  charts: { title: string, table: string, column: string, type: string, availableColumns: string[] }[] = [];
+  availableChartTypes: string[] = ['Bar', 'Line', 'Pie'];
+  selectedTables: IdNameDto[] = [];
 
   jobInProgress = new BehaviorSubject<boolean>(false);
 
@@ -42,11 +46,31 @@ export class AddReportComponent implements OnInit {
     this.dbClient.getTablesList(databaseId).subscribe(v => this.availableTables = v);
   }
 
+  onSelectedTableIdsChange(): void {
+    this.selectedTables = this.availableTables.filter(table => this.selectedTableIds.includes(table.id));
+  }
+
+  addChart(): void {
+    this.charts.push({ title: '', table: '', column: '', type: '', availableColumns: [] });
+  }
+
+  removeChart(index: number): void {
+    this.charts.splice(index, 1);
+  }
+
+  onTableChange(chart: any, index: number): void {
+    const selectedTable = this.selectedTables.find(table => table.id.toString() === chart.table);
+    if (selectedTable) {
+      this.dbClient.getColumnsList(this.selectedDatabaseId, selectedTable.id, true).subscribe(columns => {
+        this.charts[index].availableColumns = columns.map(column => column.name);
+      });
+    }
+  }
+
   doGenerate() {
     this.jobInProgress.next(true);
 
-    const tableIds = this.selectedTableIds.map(v => +v);
-    const command = new CreateReportCommand({databaseId: this.selectedDatabaseId, title: this.reportTitle, tableIds:tableIds, format: this.selectedFormat});
+    const command = new CreateReportCommand({databaseId: this.selectedDatabaseId, title: this.reportTitle, tableIds:this.selectedTableIds, format: this.selectedFormat});
     this.reportsClient.createReport(command).subscribe({
       next: (jobId) => {
         this.monitorJobStatus(jobId);

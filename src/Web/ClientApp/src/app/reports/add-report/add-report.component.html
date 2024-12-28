@@ -36,6 +36,7 @@
       class="form-control"
       multiple
       [(ngModel)]="selectedTableIds"
+      (ngModelChange)="onSelectedTableIdsChange()"
     >
       <option *ngFor="let table of availableTables" [value]="table.id">
         {{ table.name }}
@@ -58,6 +59,65 @@
       </option>
     </select>
   </div>
+  
+  <div *ngIf="selectedFormat">
+    <button class="btn btn-secondary" (click)="addChart()">Add New Chart</button>
+  </div>
 
+  <br>
+  
+  <div *ngFor="let chart of charts; let i = index" class="chart-form">
+    <h4>Chart {{ i + 1 }}</h4>
+    <div class="form-group">
+      <label for="chartTitle{{ i }}">Chart Title</label>
+      <input
+        type="text"
+        id="chartTitle{{ i }}"
+        class="form-control"
+        [(ngModel)]="chart.title"
+      />
+    </div>
+    <div class="form-group">
+      <label for="chartTable{{ i }}">Select Table</label>
+      <select
+        id="chartTable{{ i }}"
+        class="form-control"
+        [(ngModel)]="chart.table"
+        (change)="onTableChange(chart, i)"
+      >
+        <option *ngFor="let table of selectedTables" [value]="table.id">
+          {{ table.name }}
+        </option>
+      </select>
+    </div>
+    <div class="form-group" *ngIf="chart.table">
+      <label for="chartColumn{{ i }}">Measure Column</label>
+      <select
+        id="chartColumn{{ i }}"
+        class="form-control"
+        [(ngModel)]="chart.column"
+      >
+        <option *ngFor="let column of chart.availableColumns" [value]="column">
+          {{ column }}
+        </option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="chartType{{ i }}">Chart Type</label>
+      <select
+        id="chartType{{ i }}"
+        class="form-control"
+        [(ngModel)]="chart.type"
+      >
+        <option *ngFor="let type of availableChartTypes" [value]="type">
+          {{ type }}
+        </option>
+      </select>
+    </div>
+    <button class="btn btn-danger" (click)="removeChart(i)">Delete Chart</button>
+  </div>
+  
+  <br>
+  
   <button class="btn btn-primary" (click)="doGenerate()">Generate Report</button>
 </div>

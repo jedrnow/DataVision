@@ -348,6 +348,15 @@
               "format": "int32"
             },
             "x-position": 2
+          },
+          {
+            "name": "onlyNumeric",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            },
+            "x-position": 3
           }
         ],
         "responses": {
@@ -713,31 +722,6 @@
                 }
               }
             }
-          }
-        }
-      }
-    },
-    "/api/Reports/{id}/Download": {
-      "get": {
-        "tags": [
-          "Reports"
-        ],
-        "operationId": "DownloadReport",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "x-position": 1
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
           }
         }
       }
@@ -1227,11 +1211,13 @@
         "description": "",
         "x-enumNames": [
           "Pdf",
-          "Xlsx"
+          "Xlsx",
+          "Html"
         ],
         "enum": [
           "Pdf",
-          "Xlsx"
+          "Xlsx",
+          "Html"
         ]
       },
       "PaginatedListOfReportDto": {

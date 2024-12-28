@@ -60,6 +60,23 @@ public class CreateReportJob
                 report.FileName = fileName;
                 result.FileName = fileName;
             }
+            else if(format == ReportFormat.Xlsx)
+            {
+                var fileName = $"Database_{databaseId}_Report_{DateTime.UtcNow:yyyyMMdd_HHmmss}.xlsx";
+
+                var document = new DatabaseReportDocument(tables, fileName, _configuration);
+                await document.GenerateXlsxAndUploadAsync();
+
+                report.FileName = fileName;
+                result.FileName = fileName;
+            }else if(format == ReportFormat.Html)
+            {
+                var fileName = $"Database_{databaseId}_Report_{DateTime.UtcNow:yyyyMMdd_HHmmss}.html";
+                var document = new DatabaseReportDocument(tables, fileName, _configuration);
+                await document.GenerateHtmlAndUploadAsync();
+                report.FileName = fileName;
+                result.FileName = fileName;
+            }
 
             _context.Reports.Add(report);
             result.Success = true;

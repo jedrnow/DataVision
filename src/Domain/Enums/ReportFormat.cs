@@ -6,5 +6,6 @@ namespace DataVision.Domain.Enums;
 public enum ReportFormat
 {
     Pdf,
-    Xlsx
+    Xlsx,
+    Html
 }
