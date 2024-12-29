@@ -1,4 +1,5 @@
 ﻿using DataVision.Application.Common.Interfaces;
+using DataVision.Application.Common.Validators;
 
 namespace DataVision.Application.Reports.Commands.CreateReport;
 public class CreateReportCommandValidator : AbstractValidator<CreateReportCommand>
@@ -20,5 +21,8 @@ public class CreateReportCommandValidator : AbstractValidator<CreateReportComman
             .NotNull()
             .NotEmpty()
             .IsInEnum();
+
+        RuleForEach(v => v.Charts)
+            .SetValidator(new ReportChartModelValidator(existenceService));
     }
 }

@@ -17,18 +17,18 @@ public class CreateReportJob
         _configuration = configuration;
     }
 
-    public async Task Run(int jobId, string? userId, string? title, int databaseId, ReportFormat? format, List<int> tableIds, CancellationToken cancellationToken = default)
+    public async Task Run(int jobId, string? userId, CreateReportArgs args, CancellationToken cancellationToken = default)
     {
         var job = await _context.BackgroundJobs.SingleOrDefaultAsync(x => x.Id == jobId, cancellationToken);
         Guard.Against.NotFound(jobId, job);
-        Guard.Against.Null(format, nameof(format));
-        Guard.Against.NullOrEmpty(title, nameof(title));
+        Guard.Against.Null(args.Format, nameof(args.Format));
+        Guard.Against.NullOrEmpty(args.Title, nameof(args.Title));
 
         var result = new CreateReportResult()
         {
-            Title = title,
-            Format = format,
-            TableIds = tableIds,
+            Title = args.Title,
+            Format = args.Format,
+            TableIds = args.TableIds,
         };
 
         try
@@ -38,45 +38,46 @@ public class CreateReportJob
                 .Include(x => x.Columns)
                 .Include(x => x.Rows)
                     .ThenInclude(r => r.Cells)
-                .Where(x => x.DatabaseId == databaseId && tableIds.Contains(x.Id))
+                .Where(x => x.DatabaseId == args.DatabaseId && args.TableIds.Contains(x.Id))
                 .ToListAsync(cancellationToken);
 
             var report = new Report()
             {
-                DatabaseId = databaseId,
-                Title = title,
-                Format = format.Value,
+                DatabaseId = args.DatabaseId,
+                Title = args.Title,
+                Format = args.Format.Value,
                 CreatedBy = userId,
                 LastModifiedBy = userId,
             };
 
-            if (format == ReportFormat.Pdf)
+            var fileName = $"Database_{args.DatabaseId}_Report_{DateTime.UtcNow:yyyyMMdd_HHmmss}";
+            if (args.Format == ReportFormat.Pdf)
             {
-                var fileName = $"Database_{databaseId}_Report_{DateTime.UtcNow:yyyyMMdd_HHmmss}.pdf";
+                fileName += ".pdf";
 
-                var document = new DatabaseReportDocument(tables, fileName, _configuration);
+                var document = new DatabaseReportDocument(tables, args.Charts, fileName, args.GenerateTables, _configuration);
                 await document.GeneratePdfAndUploadAsync();
-
-                report.FileName = fileName;
-                result.FileName = fileName;
             }
-            else if(format == ReportFormat.Xlsx)
+            else if (args.Format == ReportFormat.Xlsx)
             {
-                var fileName = $"Database_{databaseId}_Report_{DateTime.UtcNow:yyyyMMdd_HHmmss}.xlsx";
+                fileName += ".xlsx";
 
-                var document = new DatabaseReportDocument(tables, fileName, _configuration);
+                var document = new DatabaseReportDocument(tables, args.Charts, fileName, args.GenerateTables, _configuration);
                 await document.GenerateXlsxAndUploadAsync();
-
-                report.FileName = fileName;
-                result.FileName = fileName;
-            }else if(format == ReportFormat.Html)
-            {
-                var fileName = $"Database_{databaseId}_Report_{DateTime.UtcNow:yyyyMMdd_HHmmss}.html";
-                var document = new DatabaseReportDocument(tables, fileName, _configuration);
-                await document.GenerateHtmlAndUploadAsync();
-                report.FileName = fileName;
-                result.FileName = fileName;
             }
+            else if (args.Format == ReportFormat.Html)
+            {
+                fileName += ".html";
+                var document = new DatabaseReportDocument(tables, args.Charts, fileName, args.GenerateTables, _configuration);
+                await document.GenerateHtmlAndUploadAsync();
+            }
+            else
+            {
+                throw new NotSupportedException($"Report format {args.Format} is not supported.");
+            }
+
+            report.FileName = fileName;
+            result.FileName = fileName;
 
             _context.Reports.Add(report);
             result.Success = true;

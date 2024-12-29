@@ -2000,6 +2000,8 @@ export class CreateReportCommand implements ICreateReportCommand {
     title?: string | undefined;
     tableIds?: number[];
     format?: ReportFormat | undefined;
+    generateTables?: boolean;
+    charts?: ReportChartModel[];
 
     constructor(data?: ICreateReportCommand) {
         if (data) {
@@ -2020,6 +2022,12 @@ export class CreateReportCommand implements ICreateReportCommand {
                     this.tableIds!.push(item);
             }
             this.format = _data["format"];
+            this.generateTables = _data["generateTables"];
+            if (Array.isArray(_data["charts"])) {
+                this.charts = [] as any;
+                for (let item of _data["charts"])
+                    this.charts!.push(ReportChartModel.fromJS(item));
+            }
         }
     }
 
@@ -2040,6 +2048,12 @@ export class CreateReportCommand implements ICreateReportCommand {
                 data["tableIds"].push(item);
         }
         data["format"] = this.format;
+        data["generateTables"] = this.generateTables;
+        if (Array.isArray(this.charts)) {
+            data["charts"] = [];
+            for (let item of this.charts)
+                data["charts"].push(item.toJSON());
+        }
         return data;
     }
 }
@@ -2049,12 +2063,72 @@ export interface ICreateReportCommand {
     title?: string | undefined;
     tableIds?: number[];
     format?: ReportFormat | undefined;
+    generateTables?: boolean;
+    charts?: ReportChartModel[];
 }
 
 export enum ReportFormat {
     Pdf = "Pdf",
     Xlsx = "Xlsx",
     Html = "Html",
+}
+
+export class ReportChartModel implements IReportChartModel {
+    title?: string | undefined;
+    tableId?: number;
+    labelColumnId?: number;
+    targetColumnId?: number;
+    chartType?: ChartType;
+
+    constructor(data?: IReportChartModel) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.title = _data["title"];
+            this.tableId = _data["tableId"];
+            this.labelColumnId = _data["labelColumnId"];
+            this.targetColumnId = _data["targetColumnId"];
+            this.chartType = _data["chartType"];
+        }
+    }
+
+    static fromJS(data: any): ReportChartModel {
+        data = typeof data === 'object' ? data : {};
+        let result = new ReportChartModel();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["title"] = this.title;
+        data["tableId"] = this.tableId;
+        data["labelColumnId"] = this.labelColumnId;
+        data["targetColumnId"] = this.targetColumnId;
+        data["chartType"] = this.chartType;
+        return data;
+    }
+}
+
+export interface IReportChartModel {
+    title?: string | undefined;
+    tableId?: number;
+    labelColumnId?: number;
+    targetColumnId?: number;
+    chartType?: ChartType;
+}
+
+export enum ChartType {
+    Bar = "Bar",
+    Line = "Line",
+    Pie = "Pie",
 }
 
 export class PaginatedListOfReportDto implements IPaginatedListOfReportDto {

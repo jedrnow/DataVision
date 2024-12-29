@@ -1203,6 +1203,15 @@
                 "$ref": "#/components/schemas/ReportFormat"
               }
             ]
+          },
+          "generateTables": {
+            "type": "boolean"
+          },
+          "charts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReportChartModel"
+            }
           }
         }
       },
@@ -1218,6 +1227,45 @@
           "Pdf",
           "Xlsx",
           "Html"
+        ]
+      },
+      "ReportChartModel": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "tableId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "labelColumnId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "targetColumnId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "chartType": {
+            "$ref": "#/components/schemas/ChartType"
+          }
+        }
+      },
+      "ChartType": {
+        "type": "string",
+        "description": "",
+        "x-enumNames": [
+          "Bar",
+          "Line",
+          "Pie"
+        ],
+        "enum": [
+          "Bar",
+          "Line",
+          "Pie"
         ]
       },
       "PaginatedListOfReportDto": {

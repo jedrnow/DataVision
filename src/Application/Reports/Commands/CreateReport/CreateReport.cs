@@ -1,10 +1,8 @@
-﻿using Azure.Storage.Blobs;
-using DataVision.Application.Common.Documents;
-using DataVision.Application.Common.Interfaces;
+﻿using DataVision.Application.Common.Interfaces;
 using DataVision.Application.Common.Jobs;
+using DataVision.Application.Common.Models;
 using DataVision.Domain.Entities;
 using DataVision.Domain.Enums;
-using Microsoft.Extensions.Configuration;
 
 namespace DataVision.Application.Reports.Commands.CreateReport;
 
@@ -14,6 +12,8 @@ public record CreateReportCommand : IRequest<int>
     public string? Title { get; init; }
     public List<int> TableIds { get; init; } = [];
     public ReportFormat? Format { get; init; }
+    public bool GenerateTables { get; init; }
+    public List<ReportChartModel> Charts { get; init; } = [];
 }
 
 public class CreateReportCommandHandler : IRequestHandler<CreateReportCommand, int>
@@ -40,7 +40,16 @@ public class CreateReportCommandHandler : IRequestHandler<CreateReportCommand, i
         _context.BackgroundJobs.Add(job);
         await _context.SaveChangesAsync(cancellationToken);
 
-        var externalJobId = Hangfire.BackgroundJob.Enqueue<CreateReportJob>(x => x.Run(job.Id, userId, request.Title, request.DatabaseId, request.Format, request.TableIds, cancellationToken));
+        var jobArgs = new CreateReportArgs
+        {
+            DatabaseId = request.DatabaseId,
+            Title = request.Title,
+            Format = request.Format.Value,
+            TableIds = request.TableIds,
+            GenerateTables = request.GenerateTables,
+            Charts = request.Charts
+        };
+        var externalJobId = Hangfire.BackgroundJob.Enqueue<CreateReportJob>(x => x.Run(job.Id, userId, jobArgs, cancellationToken));
 
         job.ExternalJobId = externalJobId;
         _context.BackgroundJobs.Update(job);

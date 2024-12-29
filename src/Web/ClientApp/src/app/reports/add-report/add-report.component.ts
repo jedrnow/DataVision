@@ -1,8 +1,8 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, generate } from 'rxjs';
 import { ToastService } from 'src/app/common/toast/toast.service';
-import { BackgroundJobsClient, CreateReportCommand, DatabasesClient, DatabaseTableDto, DatabaseTablesClient, IdNameDto, ReportFormat, ReportsClient } from 'src/app/web-api-client';
+import { BackgroundJobsClient, ChartType, CreateReportCommand, DatabasesClient, DatabaseTableDto, DatabaseTablesClient, IdNameDto, ReportChartModel, ReportFormat, ReportsClient } from 'src/app/web-api-client';
 
 @Component({
   selector: 'app-add-report',
@@ -14,13 +14,15 @@ export class AddReportComponent implements OnInit {
   selectedDatabaseId: number | null = null;
   selectedTableIds: number[] = [];
   selectedFormat: ReportFormat | null = null;
+  selectedLayout: string | null = null;
   
   databases: IdNameDto[] = [];
   availableTables: IdNameDto[] = [];
   availableFormats: ReportFormat[] = [ReportFormat.Pdf, ReportFormat.Xlsx, ReportFormat.Html];
+  availableLayouts: string[] = ['Only Tables', 'Only Charts', 'Tables and Charts'];
 
-  charts: { title: string, table: string, column: string, type: string, availableColumns: string[] }[] = [];
-  availableChartTypes: string[] = ['Bar', 'Line', 'Pie'];
+  charts: { title: string, table: string, column: string, labelColumn: string, type: string, availableColumns: IdNameDto[], availableLabelColumns: IdNameDto[] }[] = [];
+  availableChartTypes: ChartType[] = [ChartType.Bar, ChartType.Line, ChartType.Pie];
   selectedTables: IdNameDto[] = [];
 
   jobInProgress = new BehaviorSubject<boolean>(false);
@@ -51,7 +53,7 @@ export class AddReportComponent implements OnInit {
   }
 
   addChart(): void {
-    this.charts.push({ title: '', table: '', column: '', type: '', availableColumns: [] });
+    this.charts.push({ title: '', table: '', column: '', labelColumn: '', type: '', availableColumns: [], availableLabelColumns: [] });
   }
 
   removeChart(index: number): void {
@@ -62,17 +64,21 @@ export class AddReportComponent implements OnInit {
     const selectedTable = this.selectedTables.find(table => table.id.toString() === chart.table);
     if (selectedTable) {
       this.dbClient.getColumnsList(this.selectedDatabaseId, selectedTable.id, true).subscribe(columns => {
-        this.charts[index].availableColumns = columns.map(column => column.name);
+        this.charts[index].availableColumns = columns;
+      });
+
+      this.dbClient.getColumnsList(this.selectedDatabaseId, selectedTable.id, false).subscribe(columns => {
+        this.charts[index].availableLabelColumns = columns;
       });
     }
   }
 
   doGenerate() {
-    this.jobInProgress.next(true);
-
-    const command = new CreateReportCommand({databaseId: this.selectedDatabaseId, title: this.reportTitle, tableIds:this.selectedTableIds, format: this.selectedFormat});
+    const charts = this.charts.map(chart => new ReportChartModel({title: chart.title, tableId: +chart.table, labelColumnId: +chart.labelColumn, targetColumnId: +chart.column, chartType: chart.type as ChartType}));
+    const command = new CreateReportCommand({databaseId: this.selectedDatabaseId, title: this.reportTitle, tableIds:this.selectedTableIds, format: this.selectedFormat, charts: charts, generateTables: this.selectedLayout !== 'Only Charts'});
     this.reportsClient.createReport(command).subscribe({
       next: (jobId) => {
+        this.jobInProgress.next(true);
         this.monitorJobStatus(jobId);
       },
       error: (err) => {

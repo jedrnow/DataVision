@@ -59,8 +59,21 @@
       </option>
     </select>
   </div>
+
+  <div *ngIf="selectedFormat && selectedFormat.toString() === 'Html'">
+    <label for="layoutSelect">Select Layout</label>
+    <select
+      id="layoutSelect"
+      class="form-control"
+      [(ngModel)]="selectedLayout"
+    >
+      <option *ngFor="let layout of availableLayouts" [value]="layout">
+        {{ layout }}
+      </option>
+    </select>
+  </div>
   
-  <div *ngIf="selectedFormat">
+  <div *ngIf="selectedFormat && selectedFormat.toString() === 'Html' && selectedLayout && selectedLayout !== 'Only Tables'">
     <button class="btn btn-secondary" (click)="addChart()">Add New Chart</button>
   </div>
 
@@ -97,8 +110,20 @@
         class="form-control"
         [(ngModel)]="chart.column"
       >
-        <option *ngFor="let column of chart.availableColumns" [value]="column">
-          {{ column }}
+        <option *ngFor="let column of chart.availableColumns" [value]="column.id">
+          {{ column.name }}
+        </option>
+      </select>
+    </div>
+    <div class="form-group" *ngIf="chart.table">
+      <label for="chartLabelColumn{{ i }}">Label Column</label>
+      <select
+        id="chartLabelColumn{{ i }}"
+        class="form-control"
+        [(ngModel)]="chart.labelColumn"
+      >
+        <option *ngFor="let labelColumn of chart.availableLabelColumns" [value]="labelColumn.id">
+          {{ labelColumn.name }}
         </option>
       </select>
     </div>

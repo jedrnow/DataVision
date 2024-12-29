@@ -27,6 +27,15 @@ public class ExistenceService : IExistenceService
         return databaseTable != null;
     }
 
+    public async Task<bool> DatabaseTableColumnExistsAsync(int databaseTableColumnId, CancellationToken cancellationToken = default)
+    {
+        var databaseTable = await _context.DatabaseTableColumns
+            .AsNoTracking()
+            .SingleOrDefaultAsync(x => x.Id == databaseTableColumnId, cancellationToken);
+
+        return databaseTable != null;
+    }
+
     public async Task<bool> BackgroundJobExistsAsync(int backgroundJobId, CancellationToken cancellationToken = default)
     {
         var backgroundJob = await _context.BackgroundJobs
