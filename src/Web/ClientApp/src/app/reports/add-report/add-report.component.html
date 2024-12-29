@@ -4,6 +4,8 @@
   </div>
 </div>
 
+<h1 id="tableLabel"><a routerLink="/reports" style="text-decoration: none;">Reports</a></h1>
+
 <div [class.blocked]="jobInProgress | async">
   <div class="form-group">
     <label for="reportTitle">Report Title</label>
@@ -72,6 +74,8 @@
       </option>
     </select>
   </div>
+
+  <br>
   
   <div *ngIf="selectedFormat && selectedFormat.toString() === 'Html' && selectedLayout && selectedLayout !== 'Only Tables'">
     <button class="btn btn-secondary" (click)="addChart()">Add New Chart</button>
