@@ -1,6 +1,8 @@
 ﻿# DataVision
 
 Thesis: Application for creating reports and data visualization
+
+
 The aim of the project is to develop and implement an application that generates reports in a selected format (pdf, html, csv, etc.) containing data visualisation in graphical form (various types of charts) and tabular form (customisable tables).
 
 ## Build
