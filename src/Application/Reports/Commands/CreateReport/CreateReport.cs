@@ -10,7 +10,7 @@ public record CreateReportCommand : IRequest<int>
 {
     public int DatabaseId { get; init; }
     public string? Title { get; init; }
-    public List<int> TableIds { get; init; } = [];
+    public List<ReportTableModel> Tables { get; init; } = [];
     public ReportFormat? Format { get; init; }
     public bool GenerateTables { get; init; }
     public List<ReportChartModel> Charts { get; init; } = [];
@@ -45,7 +45,7 @@ public class CreateReportCommandHandler : IRequestHandler<CreateReportCommand, i
             DatabaseId = request.DatabaseId,
             Title = request.Title,
             Format = request.Format.Value,
-            TableIds = request.TableIds,
+            Tables = request.Tables,
             GenerateTables = request.GenerateTables,
             Charts = request.Charts
         };

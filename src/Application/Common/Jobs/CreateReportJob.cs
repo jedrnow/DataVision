@@ -24,11 +24,13 @@ public class CreateReportJob
         Guard.Against.Null(args.Format, nameof(args.Format));
         Guard.Against.NullOrEmpty(args.Title, nameof(args.Title));
 
+        var tableIds = args.Tables.Select(t => t.TableId).ToList();
+
         var result = new CreateReportResult()
         {
             Title = args.Title,
             Format = args.Format,
-            TableIds = args.TableIds,
+            TableIds = tableIds,
         };
 
         try
@@ -38,7 +40,7 @@ public class CreateReportJob
                 .Include(x => x.Columns)
                 .Include(x => x.Rows)
                     .ThenInclude(r => r.Cells)
-                .Where(x => x.DatabaseId == args.DatabaseId && args.TableIds.Contains(x.Id))
+                .Where(x => x.DatabaseId == args.DatabaseId && tableIds.Contains(x.Id))
                 .ToListAsync(cancellationToken);
 
             var report = new Report()
@@ -55,20 +57,20 @@ public class CreateReportJob
             {
                 fileName += ".pdf";
 
-                var document = new DatabaseReportDocument(tables, args.Charts, fileName, args.GenerateTables, _configuration);
+                var document = new DatabaseReportDocument(tables, args.Charts, args.Tables, fileName, args.GenerateTables, _configuration);
                 await document.GeneratePdfAndUploadAsync();
             }
             else if (args.Format == ReportFormat.Xlsx)
             {
                 fileName += ".xlsx";
 
-                var document = new DatabaseReportDocument(tables, args.Charts, fileName, args.GenerateTables, _configuration);
+                var document = new DatabaseReportDocument(tables, args.Charts, args.Tables, fileName, args.GenerateTables, _configuration);
                 await document.GenerateXlsxAndUploadAsync();
             }
             else if (args.Format == ReportFormat.Html)
             {
                 fileName += ".html";
-                var document = new DatabaseReportDocument(tables, args.Charts, fileName, args.GenerateTables, _configuration);
+                var document = new DatabaseReportDocument(tables, args.Charts, args.Tables, fileName, args.GenerateTables, _configuration);
                 await document.GenerateHtmlAndUploadAsync();
             }
             else

@@ -1998,7 +1998,7 @@ export interface IDatabaseTableDto {
 export class CreateReportCommand implements ICreateReportCommand {
     databaseId?: number;
     title?: string | undefined;
-    tableIds?: number[];
+    tables?: ReportTableModel[];
     format?: ReportFormat | undefined;
     generateTables?: boolean;
     charts?: ReportChartModel[];
@@ -2016,10 +2016,10 @@ export class CreateReportCommand implements ICreateReportCommand {
         if (_data) {
             this.databaseId = _data["databaseId"];
             this.title = _data["title"];
-            if (Array.isArray(_data["tableIds"])) {
-                this.tableIds = [] as any;
-                for (let item of _data["tableIds"])
-                    this.tableIds!.push(item);
+            if (Array.isArray(_data["tables"])) {
+                this.tables = [] as any;
+                for (let item of _data["tables"])
+                    this.tables!.push(ReportTableModel.fromJS(item));
             }
             this.format = _data["format"];
             this.generateTables = _data["generateTables"];
@@ -2042,10 +2042,10 @@ export class CreateReportCommand implements ICreateReportCommand {
         data = typeof data === 'object' ? data : {};
         data["databaseId"] = this.databaseId;
         data["title"] = this.title;
-        if (Array.isArray(this.tableIds)) {
-            data["tableIds"] = [];
-            for (let item of this.tableIds)
-                data["tableIds"].push(item);
+        if (Array.isArray(this.tables)) {
+            data["tables"] = [];
+            for (let item of this.tables)
+                data["tables"].push(item.toJSON());
         }
         data["format"] = this.format;
         data["generateTables"] = this.generateTables;
@@ -2061,10 +2061,58 @@ export class CreateReportCommand implements ICreateReportCommand {
 export interface ICreateReportCommand {
     databaseId?: number;
     title?: string | undefined;
-    tableIds?: number[];
+    tables?: ReportTableModel[];
     format?: ReportFormat | undefined;
     generateTables?: boolean;
     charts?: ReportChartModel[];
+}
+
+export class ReportTableModel implements IReportTableModel {
+    tableId?: number;
+    selectedColumns?: number[];
+
+    constructor(data?: IReportTableModel) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.tableId = _data["tableId"];
+            if (Array.isArray(_data["selectedColumns"])) {
+                this.selectedColumns = [] as any;
+                for (let item of _data["selectedColumns"])
+                    this.selectedColumns!.push(item);
+            }
+        }
+    }
+
+    static fromJS(data: any): ReportTableModel {
+        data = typeof data === 'object' ? data : {};
+        let result = new ReportTableModel();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["tableId"] = this.tableId;
+        if (Array.isArray(this.selectedColumns)) {
+            data["selectedColumns"] = [];
+            for (let item of this.selectedColumns)
+                data["selectedColumns"].push(item);
+        }
+        return data;
+    }
+}
+
+export interface IReportTableModel {
+    tableId?: number;
+    selectedColumns?: number[];
 }
 
 export enum ReportFormat {

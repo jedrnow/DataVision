@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject, generate } from 'rxjs';
 import { ToastService } from 'src/app/common/toast/toast.service';
-import { BackgroundJobsClient, ChartType, CreateReportCommand, DatabasesClient, DatabaseTableDto, DatabaseTablesClient, IdNameDto, ReportChartModel, ReportFormat, ReportsClient } from 'src/app/web-api-client';
+import { BackgroundJobsClient, ChartType, CreateReportCommand, DatabasesClient, DatabaseTableDto, DatabaseTablesClient, IdNameDto, ReportChartModel, ReportFormat, ReportsClient, ReportTableModel } from 'src/app/web-api-client';
 
 @Component({
   selector: 'app-add-report',
@@ -23,7 +23,7 @@ export class AddReportComponent implements OnInit {
 
   charts: { title: string, table: string, column: string, labelColumn: string, type: string, availableColumns: IdNameDto[], availableLabelColumns: IdNameDto[] }[] = [];
   availableChartTypes: ChartType[] = [ChartType.Bar, ChartType.Line, ChartType.Pie];
-  selectedTables: IdNameDto[] = [];
+  selectedTables: { id: number, name: string, selectedColumns: string[], availableColumns: IdNameDto[] }[] = [];
 
   jobInProgress = new BehaviorSubject<boolean>(false);
 
@@ -49,7 +49,24 @@ export class AddReportComponent implements OnInit {
   }
 
   onSelectedTableIdsChange(): void {
-    this.selectedTables = this.availableTables.filter(table => this.selectedTableIds.includes(table.id));
+    this.selectedTables = this.availableTables
+      .filter(table => this.selectedTableIds.includes(table.id))
+      .map(table => ({
+        id: table.id,
+        name: table.name,
+        selectedColumns: [],
+        availableColumns: []
+      }));
+
+    this.selectedTables.forEach(table => {
+      this.dbClient.getColumnsList(this.selectedDatabaseId, table.id, false).subscribe(columns => {
+        table.availableColumns = columns;
+      });
+    });
+  }
+
+  onSelectedColumnsChange(table: any): void {
+    
   }
 
   addChart(): void {
@@ -75,7 +92,8 @@ export class AddReportComponent implements OnInit {
 
   doGenerate() {
     const charts = this.charts.map(chart => new ReportChartModel({title: chart.title, tableId: +chart.table, labelColumnId: +chart.labelColumn, targetColumnId: +chart.column, chartType: chart.type as ChartType}));
-    const command = new CreateReportCommand({databaseId: this.selectedDatabaseId, title: this.reportTitle, tableIds:this.selectedTableIds, format: this.selectedFormat, charts: charts, generateTables: this.selectedLayout !== 'Only Charts'});
+    const tables = this.selectedTables.map(table => new ReportTableModel({tableId: table.id, selectedColumns: table.selectedColumns.map(col => +col)}));
+    const command = new CreateReportCommand({databaseId: this.selectedDatabaseId, title: this.reportTitle, tables:tables, format: this.selectedFormat, charts: charts, generateTables: this.selectedLayout !== 'Only Charts'});
     this.reportsClient.createReport(command).subscribe({
       next: (jobId) => {
         this.jobInProgress.next(true);

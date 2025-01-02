@@ -49,6 +49,24 @@
     </small>
   </div>
 
+  <div *ngFor="let table of selectedTables" class="form-group">
+    <label for="columnsSelect{{ table.id }}">Select Columns for {{ table.name }}</label>
+    <select
+      id="columnsSelect{{ table.id }}"
+      class="form-control"
+      multiple
+      [(ngModel)]="table.selectedColumns"
+      (ngModelChange)="onSelectedColumnsChange(table)"
+    >
+      <option *ngFor="let column of table.availableColumns" [value]="column.id">
+        {{ column.name }}
+      </option>
+    </select>
+    <small class="form-text text-muted">
+      Hold Ctrl (or Command on Mac) to select multiple columns.
+    </small>
+  </div>
+
   <div class="form-group" *ngIf="selectedTableIds && selectedTableIds.length">
     <label for="formatSelect">Select Format</label>
     <select

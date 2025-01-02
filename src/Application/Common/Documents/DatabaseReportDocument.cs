@@ -17,15 +17,17 @@ namespace DataVision.Application.Common.Documents
     {
         private readonly List<DatabaseTable> _tables;
         private readonly string _fileName;
-        private readonly List<ReportChartModel> _charts;
+        private readonly List<ReportChartModel> _chartConfigList;
+        private readonly List<ReportTableModel> _tableConfigList;
         private readonly bool _generateTables;
         private readonly IConfiguration _configuration;
         private int _chartIndex = 0;
 
-        public DatabaseReportDocument(List<DatabaseTable> tables, List<ReportChartModel> charts, string fileName, bool generateTables, IConfiguration configuration)
+        public DatabaseReportDocument(List<DatabaseTable> tables, List<ReportChartModel> chartConfigList, List<ReportTableModel> tableConfigList, string fileName, bool generateTables, IConfiguration configuration)
         {
             _tables = tables;
-            _charts = charts;
+            _chartConfigList = chartConfigList;
+            _tableConfigList = tableConfigList;
             _fileName = fileName;
             _generateTables = generateTables;
             _configuration = configuration;
@@ -43,22 +45,27 @@ namespace DataVision.Application.Common.Documents
                 var counter = _tables.Count;
                 foreach (var table in _tables)
                 {
+                    var columnIds = _tableConfigList.FirstOrDefault(x => x.TableId == table.Id)?.SelectedColumns ?? [];
                     document.Add(new Paragraph(table.Name)
                         .SetTextAlignment(TextAlignment.CENTER)
                         .SetFontSize(16));
 
-                    var pdfTable = new Table(table.Columns.Count, true).SetAutoLayout();
+                    var pdfTable = new Table(columnIds.Count, true).SetAutoLayout();
 
-                    foreach (var column in table.Columns)
+                    foreach (var columnId in columnIds)
                     {
-                        pdfTable.AddHeaderCell(new Cell().Add(new Paragraph(column.Name)));
+                        var column = table.Columns.FirstOrDefault(x => x.Id == columnId);
+                        if (column != null) pdfTable.AddHeaderCell(new Cell().Add(new Paragraph(column.Name)));
                     }
 
                     foreach (var row in table.Rows)
                     {
                         foreach (var cell in row.Cells)
                         {
-                            pdfTable.AddCell(new Cell().Add(new Paragraph(cell.Value)));
+                            if (columnIds.Contains(cell.DatabaseTableColumnId))
+                            {
+                                pdfTable.AddCell(new Cell().Add(new Paragraph(cell.Value)));
+                            }
                         }
                     }
 
@@ -91,21 +98,27 @@ namespace DataVision.Application.Common.Documents
             {
                 foreach (var table in _tables)
                 {
+                    var columnIds = _tableConfigList.FirstOrDefault(x => x.TableId == table.Id)?.SelectedColumns ?? [];
                     var worksheet = workbook.Worksheets.Add(table.Name ?? table.Id.ToString());
 
                     // Add column headers
-                    for (int i = 0; i < table.Columns.Count; i++)
+                    for (int i = 0; i < columnIds.Count; i++)
                     {
-                        worksheet.Cell(1, i + 1).Value = table.Columns[i].Name;
+                        var columnId = columnIds[i];
+                        var column = table.Columns.FirstOrDefault(x => x.Id == columnId);
+
+                        worksheet.Cell(1, i + 1).Value = column?.Name;
                     }
 
                     // Add rows and cells
                     for (int i = 0; i < table.Rows.Count; i++)
                     {
                         var row = table.Rows[i];
-                        for (int j = 0; j < row.Cells.Count; j++)
+                        for (int j = 0; j < columnIds.Count; j++)
                         {
-                            worksheet.Cell(i + 2, j + 1).Value = row.Cells[j].Value;
+                            var columnId = columnIds[j];
+                            var cell = row.Cells.FirstOrDefault(x => x.DatabaseTableColumnId == columnId);
+                            worksheet.Cell(i + 2, j + 1).Value = cell?.Value;
                         }
                     }
 
@@ -141,10 +154,13 @@ namespace DataVision.Application.Common.Documents
                 {
                     htmlBuilder.Append("<table border='1'><tr>");
 
+                    var columnIds = _tableConfigList.FirstOrDefault(x => x.TableId == table.Id)?.SelectedColumns ?? [];
+
                     // Add column headers
-                    foreach (var column in table.Columns)
+                    foreach (var columnId in columnIds)
                     {
-                        htmlBuilder.Append($"<th>{HttpUtility.HtmlEncode(column.Name)}</th>");
+                        var column = table.Columns.FirstOrDefault(x => x.Id == columnId);
+                        htmlBuilder.Append($"<th>{HttpUtility.HtmlEncode(column?.Name ?? "")}</th>");
                     }
                     htmlBuilder.Append("</tr>");
 
@@ -154,16 +170,19 @@ namespace DataVision.Application.Common.Documents
                         htmlBuilder.Append("<tr>");
                         foreach (var cell in row.Cells)
                         {
-                            htmlBuilder.Append($"<td>{HttpUtility.HtmlEncode(cell.Value)}</td>");
+                            if (columnIds.Contains(cell.DatabaseTableColumnId))
+                            {
+                                htmlBuilder.Append($"<td>{HttpUtility.HtmlEncode(cell.Value)}</td>");
+                            }
                         }
                         htmlBuilder.Append("</tr>");
                     }
                     htmlBuilder.Append("</table>");
                 }
 
-                if (_charts.Any(x => x.TableId == table.Id))
+                if (_chartConfigList.Any(x => x.TableId == table.Id))
                 {
-                    foreach (var chart in _charts.Where(x => x.TableId == table.Id))
+                    foreach (var chart in _chartConfigList.Where(x => x.TableId == table.Id))
                     {
                         AddChart(chart, table, ref htmlBuilder);
                     }

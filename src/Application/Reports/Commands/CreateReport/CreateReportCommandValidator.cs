@@ -14,9 +14,6 @@ public class CreateReportCommandValidator : AbstractValidator<CreateReportComman
             .NotEmpty()
             .MustAsync(existenceService.DatabaseExistsAsync);
 
-        RuleFor(v => v.TableIds)
-            .NotEmpty();
-
         RuleFor(v => v.Format)
             .NotNull()
             .NotEmpty()
